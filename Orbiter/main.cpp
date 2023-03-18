@@ -4,7 +4,6 @@
 int main()
 {
     sf::Clock clock;
-    // Tworzenie okna
     sf::RenderWindow window(sf::VideoMode(800, 600), "Orbiter");
 
     // Ustawienie pozycji pocz¹tkowej planety
@@ -27,7 +26,6 @@ int main()
     // G³ówna pêtla programu
     while (window.isOpen())
     {
-        // Obs³uga zdarzeñ
         sf::Event event;
         while (window.pollEvent(event))
         {
@@ -41,15 +39,9 @@ int main()
         float x = window.getSize().x / 2.f + std::cos(angle) * radius;
         float y = window.getSize().y / 2.f + std::sin(angle) * radius;
         planet.setPosition(x, y);
-
-        // Wyczyszczenie okna
         window.clear();
-
-        // Rysowanie orbit i planety
         window.draw(orbit);
         window.draw(planet);
-
-        // Wyœwietlenie zmian na ekranie
         window.display();
     }
 
