@@ -5,12 +5,12 @@ UNDER MAJOR DEVELOPMENT - first release on 21.03.23!
 
 
 
-To add:
--define orbit in 3d
--up to 10 objects on different orbit
--Parameters: orbital speed, apoapsis, periapsis, orbital period, time do apoapsis/periapsis, inclination, eccentricity, nodes
--manevuer assist: edit orbit by pro/retro gradin, nml, rad - KSP Style
--add 2 views - side & top - a'la Space Shuttle navigation system
+To add:\n
+-define orbit in 3d \n
+-up to 10 objects on different orbit \n 
+-Parameters: orbital speed, apoapsis, periapsis, orbital period, time do apoapsis/periapsis, inclination, eccentricity, nodes \n 
+-manevuer assist: edit orbit by pro/retro gradin, nml, rad - KSP Style \n 
+-add 2 views - side & top - a'la Space Shuttle navigation system \n 
 -Include Einstein's relativity delay (a'la GPS) when communicating
 -Implement current position with rotating - GRAD, NML, RAD
 -implement simple algorithm for reentry burn
