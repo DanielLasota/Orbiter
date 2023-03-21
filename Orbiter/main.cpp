@@ -6,7 +6,9 @@
 #include <SFML/Graphics/Text.hpp>
 #include <sstream>
 #include <iomanip>
+#include <math.h>
 
+# define M_PI           3.14159265358979323846
 
 
 
@@ -15,34 +17,24 @@ int main()
     sf::Clock clock;
     sf::RenderWindow window(sf::VideoMode(800, 600), "Orbiter");
 
-    //// Ustawienie pozycji pocz¹tkowej planety
-    sf::CircleShape planet(5.f);
-    planet.setFillColor(sf::Color::Green);
-    planet.setPosition(window.getSize().x / 2.f, window.getSize().y / 2.f);
-
-    // Ustawienie parametrów orbity
-    // Ustawienie parametrów orbity
-    sf::VertexArray orbit(sf::LineStrip, 361);  // Dodanie jednego dodatkowego wierzcho³ka
+    // orbit parameters set
+    sf::VertexArray orbit(sf::LineStrip, 361);
     orbit[0].position = sf::Vector2f(300, 300);
     orbit[0].color = sf::Color::Green;
     float radius = 200.0f;
-    for (int i = 0; i < 361; i++) {  // Zwiêkszenie liczby iteracji o 1
+    for (int i = 0; i < 361; i++) {
         float angle = i * 3.14f / 180.0f;
-        float x = radius * std::cos(angle) + 105.f;
-        float y = radius * std::sin(angle) + 7.f;
+        float x = radius * std::cos(angle);
+        float y = radius * std::sin(angle);
         orbit[i].position = sf::Vector2f(300 + x, 300 + y);
         orbit[i].color = sf::Color::Green;
     }
-    // G³ówna pêtla programu
 
-
-
-
-
-
-
-
-
+    // satellite
+    sf::CircleShape satellite(5.f);
+    satellite.setFillColor(sf::Color::Green);
+    satellite.setOrigin(satellite.getRadius(), satellite.getRadius());
+    satellite.setPosition(orbit[0].position);
 
     while (window.isOpen())
     {
@@ -52,21 +44,21 @@ int main()
             if (event.type == sf::Event::Closed)
                 window.close();
         }
+
         // Aktualizacja pozycji planety na orbicie
         float time = static_cast<float>(clock.getElapsedTime().asMilliseconds());
-        float angle = time * 0.0001f;
-        float x = window.getSize().x / 2.f + std::cos(angle) * radius;
-        float y = window.getSize().y / 2.f + std::sin(angle) * radius;
-        planet.setPosition(x, y);
+        float angle = time * 0.00001f;
+        int index = static_cast<int>(angle / (2.f * M_PI) * orbit.getVertexCount());
+        satellite.setPosition(orbit[index].position);
+
         window.clear();
         window.draw(orbit);
-        window.draw(planet);
+        window.draw(satellite);
         window.display();
     }
 
     return 0;
 }
-
 
 //int main()
 //{
