@@ -1,7 +1,7 @@
 # Orbiter
 Simple - lightweight program to manage orbites and orbital trajectories.
 
-UNDER MAJOR DEVELOPMENT - first release on 21.03.23!
+22/23.03 - Prototyping orbital 3d engine (SFML && OpenGL) a'la SpaceX's Crew Dragon && STS Combined
 
 
 
