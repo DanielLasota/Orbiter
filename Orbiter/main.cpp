@@ -92,11 +92,13 @@ int main()
     window.setActive(true);
     //window.setVerticalSyncEnabled(true); //doesnt work, dunno, why
 
-    int lastMouseX = 0;
-    int lastMouseY = 0;
+    static float angleX = 0.f;
+    static float angleZ = 0.f;
+        sf::Vector2f previousMousePos;
+    sf::Vector2i lastPosition;
 
     bool running = true;
-    sf::Vector2i lastMousePos = sf::Mouse::getPosition();
+    /*sf::Vector2i lastMousePos = sf::Mouse::getPosition();*/
     while (running)
     {
         // Obs³u¿ zdarzenia okna
@@ -112,35 +114,41 @@ int main()
                 // adjust the viewport when the window is resized
                 glViewport(0, 0, event.size.width, event.size.height);
             }
+            else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+            {
+                lastPosition = sf::Mouse::getPosition(window);
+            }
+            else if (event.type == sf::Event::MouseMoved && sf::Mouse::isButtonPressed(sf::Mouse::Left))
+            {
+                
+                // actual & last coursor position difference
+                sf::Vector2i delta = sf::Mouse::getPosition(window) - lastPosition;
+                // rotate
+                angleX += delta.x * -0.1f;
+                angleZ += delta.y * -0.1f;
+                //window.setView(view);
+                lastPosition = sf::Mouse::getPosition(window);
+
+                if (angleX > 360.f)
+                {
+                    angleX -= 360.f;
+                }
+                if (angleX < 0.f)
+                {
+                    angleX += 360.f;
+                }
+                if (angleZ > 360.f)
+                {
+                    angleZ -= 360.f;
+                }
+                if (angleZ < 0.f)
+                {
+                    angleZ += 360.f;
+                }
+            }
         }
 
-        static float angleX = 0.f;
-        static float angleZ = 0.f;
-        if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
-        {
-            sf::Vector2i currentMousePos = sf::Mouse::getPosition();
-            sf::Vector2i mouseDelta = currentMousePos - lastMousePos;
-            lastMousePos = currentMousePos;
-            angleX += mouseDelta.x * 0.1f;
-            angleZ += mouseDelta.y * 0.1f;
-            if (angleX > 360.f)
-            {
-                angleX -= 360.f;
-            }
-            if (angleX < 0.f)
-            {
-                angleX += 360.f;
-            }
-            if (angleZ > 360.f)
-            {
-                angleZ -= 360.f;
-            }
-            if (angleZ < 0.f)
-            {
-                angleZ += 360.f;
-            }
-        }
-
+       
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
