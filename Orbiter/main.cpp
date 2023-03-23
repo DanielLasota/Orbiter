@@ -1,4 +1,4 @@
-//Welcome to the orbiter alpha, early design phase.
+//Welcome to the orbiter alpha - early design phase orbital manager multi inbsturment unit
 //
 //This Soft is a Project universal design pattern to finish 
 //for target-satellite-ship whatever the fuck You want to throw out to orbit, 
@@ -51,29 +51,53 @@
 
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
-#include <GL/glu.h>
 #include <GL/glut.h>
+#include <iostream>
 
 int main()
 {
+    sf::ContextSettings settings;
+    settings.depthBits = 24;
+    settings.stencilBits = 8;
+    settings.antialiasingLevel = 8;
+    settings.majorVersion = 3;
+    settings.minorVersion = 0;
     // Utwórz okno renderowania
     sf::RenderWindow window(sf::VideoMode(800, 600), "Prosty silnik graficzny 3D");
 
-    // Ustaw parametry OpenGL
+    // openGL parameters
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
+    glEnable(GL_LIGHTING);
 
-    // Utwórz kulkê
+
+
+    // light source
+    GLfloat light_position[] = { 0.f, 0.f, 500.f, 1.f };
+    GLfloat light_diffuse[] = { 1.f, 1.f, 1.f, 1.f };
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+    glEnable(GL_LIGHT0);
+
+    // Ball initialise
     sf::CircleShape ball(50.f);
-    ball.setFillColor(sf::Color::Red);
+    //sf::SphereShape ball(50.f, 32, 32);
+    //ball.setFillColor(sf::Color::Green);
 
-    // Utwórz kamery
+    // Camera initalise
     sf::Vector3f cameraPosition(0.f, 0.f, 500.f);
     sf::Vector3f cameraTarget(0.f, 0.f, 0.f);
     sf::Vector3f cameraUp(0.f, 1.f, 0.f);
 
-    // G³ówna pêtla gry
-    while (window.isOpen())
+    window.setActive(true);
+    //window.setVerticalSyncEnabled(true); //doesnt work, dunno, why
+
+    int lastMouseX = 0;
+    int lastMouseY = 0;
+
+    bool running = true;
+    sf::Vector2i lastMousePos = sf::Mouse::getPosition();
+    while (running)
     {
         // Obs³u¿ zdarzenia okna
         sf::Event event;
@@ -81,32 +105,63 @@ int main()
         {
             if (event.type == sf::Event::Closed)
             {
-                window.close();
+                running = false;
+            }
+            else if (event.type == sf::Event::Resized)
+            {
+                // adjust the viewport when the window is resized
+                glViewport(0, 0, event.size.width, event.size.height);
             }
         }
 
-        // Obróæ kulê
-        static float angle = 0.f;
-        angle += 0.1f;
-        if (angle > 360.f)
+        static float angleX = 0.f;
+        static float angleZ = 0.f;
+        // Rotate Ball only when left mouse button is pressed
+        if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
         {
-            angle = 0.f;
+            sf::Vector2i currentMousePos = sf::Mouse::getPosition();
+            sf::Vector2i mouseDelta = currentMousePos - lastMousePos;
+            lastMousePos = currentMousePos;
+            angleX += mouseDelta.x * 0.1f;
+            angleZ += mouseDelta.y * 0.1f;
+            if (angleX > 360.f)
+            {
+                angleX -= 360.f;
+            }
+            if (angleX < 0.f)
+            {
+                angleX += 360.f;
+            }
+            if (angleZ > 360.f)
+            {
+                angleZ -= 360.f;
+            }
+            if (angleZ < 0.f)
+            {
+                angleZ += 360.f;
+            }
         }
 
-        // Wyczyœæ bufor koloru i bufor g³êbokoœci
+
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        gluPerspective(90.f, (float)window.getSize().x / (float)window.getSize().y, 1.f, 1000.f);
+
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Ustaw kamery
+        // Camera Setup
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
         gluLookAt(cameraPosition.x, cameraPosition.y, cameraPosition.z,
             cameraTarget.x, cameraTarget.y, cameraTarget.z,
             cameraUp.x, cameraUp.y, cameraUp.z);
 
-        // Przemieszczaj kulê wzd³u¿ osi Z i obracaj j¹ wzd³u¿ osi Y
+        //RotateBall
+
         glPushMatrix();
         glTranslatef(0.f, 0.f, -100.f);
-        glRotatef(angle, 0.f, 1.f, 0.f);
+        glRotatef(angleX, 0.f, 2.f, 0.f);
+        glRotatef(angleZ, 2.f, 0.f, 0.f);
         glBegin(GL_TRIANGLE_FAN);
         glVertex3f(0.f, 0.f, 0.f);
         const int segments = 32;
@@ -119,7 +174,6 @@ int main()
         glEnd();
         glPopMatrix();
 
-        // Wyœwietl zawartoœæ bufora
         window.display();
     }
 
@@ -172,7 +226,7 @@ int main()
 //    satellite.setOrigin(satellite.getRadius(), satellite.getRadius());
 //    satellite.setPosition(orbit[0].position);
 //
-// 
+//
 //    while (window.isOpen())
 //    {
 //        sf::Event event;
