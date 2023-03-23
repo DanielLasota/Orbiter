@@ -116,7 +116,6 @@ int main()
 
         static float angleX = 0.f;
         static float angleZ = 0.f;
-        // Rotate Ball only when left mouse button is pressed
         if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
         {
             sf::Vector2i currentMousePos = sf::Mouse::getPosition();
