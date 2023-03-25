@@ -53,13 +53,13 @@
 #include <SFML/OpenGL.hpp>
 #include <GL/glut.h>
 #include <gl/GLU.h>
-
+#include <iostream>
 int main()
 {
     sf::ContextSettings settings;
     settings.depthBits = 24;
     settings.stencilBits = 8;
-    settings.antialiasingLevel = 4;
+    settings.antialiasingLevel = 16;
     settings.majorVersion = 3;
     settings.minorVersion = 0;
 
@@ -132,28 +132,26 @@ int main()
                 // actual & last coursor position difference
                 sf::Vector2i delta = sf::Mouse::getPosition(window) - lastPosition;
                 // rotate
-                anglex += delta.x * -0.05f;
-                angley += delta.y * -0.05f;
+                anglex += delta.x * -0.01f;
+                angley += delta.y * -0.01f;
                 //window.setView(view);
-
-
                 lastPosition = sf::Mouse::getPosition(window);
 
-                if (anglex > 180.f)
+                //if (anglex > 360.f)
+                //{
+                //    anglex -= 360.f;
+                //}
+                //if (anglex < 0.f)
+                //{
+                //    anglex += 360.f;
+                //}
+                if (angley > 1.57f)
                 {
-                    anglex -= 180.f;
+                    angley = 1.57;
                 }
-                if (anglex < 0.f)
+                if (angley < -1.57f)
                 {
-                    anglex += 180.f;
-                }
-                if (angley > 360.f)
-                {
-                    angley -= 360.f;
-                }
-                if (angley < 0.f)
-                {
-                    angley += 360.f;
+                    angley = -1.57f;
                 }
             }
             if (event.type == sf::Event::MouseWheelScrolled)
@@ -167,6 +165,8 @@ int main()
             }
         }
 
+        std::cout << "angley: " << angley << std::endl;
+
         // clear the buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -179,10 +179,9 @@ int main()
 
 
         //sphere equation
-        cameraPosition.x = r * sin(anglex) * cos(angley);
-        cameraPosition.y = r * sin(anglex) * sin(angley);
-        cameraPosition.z = r * cos(anglex);
-
+        cameraPosition.x = r * cos(anglex) * cos(angley);
+        cameraPosition.y = r * sin(angley);
+        cameraPosition.z = r * sin(anglex) * cos(angley);
 
         cameraTarget.x = 0;
         cameraTarget.y = 0;
