@@ -54,6 +54,8 @@
 #include <GL/glut.h>
 #include <gl/GLU.h>
 #include <iostream>
+
+
 int main()
 {
     sf::ContextSettings settings;
@@ -91,9 +93,9 @@ int main()
     sf::Vector2f previousMousePos;
     sf::Vector2i lastPosition;
 
-    float theta = 0.0f; // kąt wznoszenia kamery (pomiędzy 0 a 180 stopni)
-    float phi = 0.0f; // kąt obrotu kamery (pomiędzy 0 a 360 stopni)
-    float r = 100.f;
+    float theta = 0.f; // camera's inclination angle (between 0 and 180 degrees)
+    float phi = 0.f; // camera's rotation angle (between 0 and 360 degrees)
+    float r = 200.f; // camera's distance from the origin
 
 
 
@@ -218,6 +220,24 @@ int main()
         glColor3f(1.f, 0.f, 0.f);
         glutSolidSphere(20.f, 50, 50);
         glPopMatrix();
+
+        //orbit render data - to transform into an orbit
+        glPushMatrix();
+        glTranslatef(0.f, 0.f, 0.f);
+        glColor3f(0.f, 1.f, 0.f);
+        glBegin(GL_LINE_LOOP);
+        //orbit render data - to transform into an orbit
+        for (int i = 0; i < 50; ++i)
+        {
+            float theta = 2.0f * 3.1415926f * float(i) / float(50); // kąt w radianach
+            float x = 80 * cosf(theta); // współrzędna x punktu na okręgu //80 to promien orbity
+            float z = 80 * sinf(theta); // współrzędna z punktu na okręgu // 80 to promien orbity
+            glVertex3f(x, 0.f, z); // wierzchołek okręgu
+        }
+        glEnd();
+        glPopMatrix();
+
+
 
 
 
