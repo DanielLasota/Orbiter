@@ -4,7 +4,7 @@ Simple - lightweight program to manage orbites and orbital trajectories.
 25.03 - Basic 3D engine ready, still rototyping orbital 3d engine (SFML && OpenGL) a'la SpaceX's Crew Dragon && STS Combined
 25.03 - addin fotochromatic aberration & improvin camera's sphere equation trajectory
 25.03 - Specifying orbit parameters, input && orbit render
-
+25.03 - Linux && android port! 
 
 
 
