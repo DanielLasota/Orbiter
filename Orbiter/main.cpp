@@ -78,6 +78,9 @@ int main()
     sf::Vector3f cameraTarget(0.f, 0.f, 0.f);
     sf::Vector3f cameraUp(0.f, 1.f, 0.f);
 
+
+
+    ////ranodm comment jusat to push to github
     // activate the window
     window.setActive(true);
     // load resources, initialize the OpenGL states, ...
