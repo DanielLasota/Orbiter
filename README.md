@@ -32,8 +32,6 @@ LOT OF WORK TO DO!!!!
 
 
 
-![alt text](https://user-images.githubusercontent.com/127039319/227673353-5fc239bb-92e4-411e-a54f-3650f826cf9b.jpg)
-
-
+![alt text](https://user-images.githubusercontent.com/127039319/227675226-8856339c-bd17-401c-94c1-1688fc10a33f.jpg)
 
 ![alt text](https://user-images.githubusercontent.com/127039319/226501465-16664429-578d-4acc-ac39-a027a1e354b7.jpg)
