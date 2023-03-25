@@ -1,7 +1,8 @@
 # Orbiter
 Simple - lightweight program to manage orbites and orbital trajectories.
 
-24.03 - Prototyping orbital 3d engine (SFML && OpenGL) a'la SpaceX's Crew Dragon && STS Combined
+25.03 - Prototyping orbital 3d engine (SFML && OpenGL) a'la SpaceX's Crew Dragon && STS Combined
+25.03 - addin fotochromatic aberration & improvin camera's sphere equation trajectory
 
 
 
@@ -28,5 +29,11 @@ To add:
 -add simulated input from 3 sensors & voting while outbound/malfunction
 
 LOT OF WORK TO DO!!!!
+
+
+
+![alt text](https://user-images.githubusercontent.com/127039319/227673353-5fc239bb-92e4-411e-a54f-3650f826cf9b.jpg)
+
+
 
 ![alt text](https://user-images.githubusercontent.com/127039319/226501465-16664429-578d-4acc-ac39-a027a1e354b7.jpg)
