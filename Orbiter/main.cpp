@@ -70,12 +70,7 @@ int main()
     glDepthFunc(GL_LESS);
     glEnable(GL_LIGHTING);
 
-    // light source
-    GLfloat light_position[] = { 0.f, 0.f, 500.f, 1.f };
-    GLfloat light_diffuse[] = { 1.f, 1.f, 1.f, 1.f };
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-    glEnable(GL_LIGHT0);
+ 
     // Camera initalise
     sf::Vector3f cameraPosition(0.f, 0.f, 500.f);
     sf::Vector3f cameraTarget(0.f, 0.f, 0.f);
@@ -90,15 +85,29 @@ int main()
     // initialize projection and view matrices
 
 
-    static float angleX = 0.f;
-    static float angleZ = 0.f;
+    static float anglex = 0.f;
+    static float angley = 0.f;
     static float distance = 100.f;
     sf::Vector2f previousMousePos;
     sf::Vector2i lastPosition;
 
+    float theta = 0.0f; // kąt wznoszenia kamery (pomiędzy 0 a 180 stopni)
+    float phi = 0.0f; // kąt obrotu kamery (pomiędzy 0 a 360 stopni)
+    float r = 100.f;
+
+
+
     bool running = true;
     while (running)
     {
+
+        // light source
+        GLfloat light_position[] = { 500.f, 0.f, 500.f, 1.f };
+        GLfloat light_diffuse[] = { 1.f, 1.f, 1.f, 1.f };
+        glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+        glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+        glEnable(GL_LIGHT0);
+
         // handle events
         sf::Event event;
         while (window.pollEvent(event))
@@ -123,31 +132,28 @@ int main()
                 // actual & last coursor position difference
                 sf::Vector2i delta = sf::Mouse::getPosition(window) - lastPosition;
                 // rotate
-                angleX += delta.x * -0.1f;
-                angleZ += delta.y * -0.1f;
+                anglex += delta.x * -0.05f;
+                angley += delta.y * -0.05f;
                 //window.setView(view);
-
-
-
 
 
                 lastPosition = sf::Mouse::getPosition(window);
 
-                if (angleX > 360.f)
+                if (anglex > 180.f)
                 {
-                    angleX -= 360.f;
+                    anglex -= 180.f;
                 }
-                if (angleX < 0.f)
+                if (anglex < 0.f)
                 {
-                    angleX += 360.f;
+                    anglex += 180.f;
                 }
-                if (angleZ > 360.f)
+                if (angley > 360.f)
                 {
-                    angleZ -= 360.f;
+                    angley -= 360.f;
                 }
-                if (angleZ < 0.f)
+                if (angley < 0.f)
                 {
-                    angleZ += 360.f;
+                    angley += 360.f;
                 }
             }
             if (event.type == sf::Event::MouseWheelScrolled)
@@ -156,7 +162,7 @@ int main()
                 {
                     //window.zoom(1 - event.mouseWheelScroll.delta / 10.0f;
                     //window.setView(view);
-                    distance += event.mouseWheelScroll.delta * 10.f;
+                    r -= event.mouseWheelScroll.delta * 10.f;
                 }
             }
         }
@@ -170,22 +176,52 @@ int main()
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
+
+
+        //sphere equation
+        cameraPosition.x = r * sin(anglex) * cos(angley);
+        cameraPosition.y = r * sin(anglex) * sin(angley);
+        cameraPosition.z = r * cos(anglex);
+
+
+        cameraTarget.x = 0;
+        cameraTarget.y = 0;
+        cameraTarget.z = 0;
+        cameraUp.x = 0;
+        cameraUp.y = 1;
+        cameraUp.z = 0;
+
         gluLookAt(
             cameraPosition.x, cameraPosition.y, cameraPosition.z,
             cameraTarget.x, cameraTarget.y, cameraTarget.z,
             cameraUp.x, cameraUp.y, cameraUp.z
         );
 
-
-        // draw sphere
-        //glMatrixMode(GL_MODELVIEW);
+        // draw 1st sphere
+        glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
-        glTranslatef(0.f, 0.f, distance);
-        glRotatef(angleX, 0.f, 2.f, 0.f);
-        glRotatef(angleZ, 2.f, 0.f, 0.f);
+        glTranslatef(0.f, 0.f, 0.f);
+        //glTranslatef(0.f, 0.f, distance);
+        //glRotatef(angleX, 0.f, 2.f, 0.f);
+        //glRotatef(angleZ, 2.f, 0.f, 0.f);
         glColor3f(1.f, 0.f, 0.f);
         glutSolidSphere(50.f, 50, 50);
         glPopMatrix();
+
+
+
+        //2nd sphere just for prototypin
+        glPushMatrix();
+        glTranslatef(100.f, 0.f, 0.f);
+        //glTranslatef(0.f, 0.f, distance);
+        //glRotatef(angleX, 0.f, 2.f, 0.f);
+        //glRotatef(angleZ, 2.f, 0.f, 0.f);
+        glColor3f(1.f, 0.f, 0.f);
+        glutSolidSphere(20.f, 50, 50);
+        glPopMatrix();
+
+
+
         // end the current frame (internally swaps the front and back buffers)
         window.display();
     }
