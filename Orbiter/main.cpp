@@ -78,14 +78,10 @@ int main()
     sf::Vector3f cameraTarget(0.f, 0.f, 0.f);
     sf::Vector3f cameraUp(0.f, 1.f, 0.f);
 
-
-
-
     // activate the window
     window.setActive(true);
     // load resources, initialize the OpenGL states, ...
     // initialize projection and view matrices
-
 
     static float anglex = 0.f;
     static float angley = 0.f;
@@ -124,7 +120,7 @@ int main()
                 // adjust the viewport when the window is resized
                 glViewport(0, 0, event.size.width, event.size.height);
             }
-            else if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
             {
                 lastPosition = sf::Mouse::getPosition(window);
             }
@@ -156,7 +152,7 @@ int main()
                     angley = -1.57f;
                 }
             }
-            if (event.type == sf::Event::MouseWheelScrolled)
+            else if (event.type == sf::Event::MouseWheelScrolled)
             {
                 if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel)
                 {
@@ -174,7 +170,7 @@ int main()
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        gluPerspective(45.f, (float)window.getSize().x / (float)window.getSize().y, 0.1f, 1000.f);
+        gluPerspective(60.f, (float)window.getSize().x / (float)window.getSize().y, 0.1f, 1000.f);
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
@@ -221,12 +217,16 @@ int main()
         glutSolidSphere(20.f, 50, 50);
         glPopMatrix();
 
+
+
+
         //orbit render data - to transform into an orbit
+        //glDisable(GL_LIGHT0);
         glPushMatrix();
         glTranslatef(0.f, 0.f, 0.f);
-        glColor3f(0.f, 1.f, 0.f);
+        glDisable(GL_LIGHTING);
+        glColor3f(0.2f, 0.6f, 0.2f);
         glBegin(GL_LINE_LOOP);
-        //orbit render data - to transform into an orbit
         for (int i = 0; i < 50; ++i)
         {
             float theta = 2.0f * 3.1415926f * float(i) / float(50); // kąt w radianach
@@ -235,11 +235,8 @@ int main()
             glVertex3f(x, 0.f, z); // wierzchołek okręgu
         }
         glEnd();
+        glEnable(GL_LIGHTING);
         glPopMatrix();
-
-
-
-
 
         // end the current frame (internally swaps the front and back buffers)
         window.display();
