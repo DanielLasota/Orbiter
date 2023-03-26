@@ -58,8 +58,6 @@
 int main()
 {
     
-
-    // create the window
     sf::Window window(sf::VideoMode(800, 600), "OpenGL", sf::Style::Default, sf::ContextSettings(32));
     window.setVerticalSyncEnabled(true);
     glEnable(GL_DEPTH_TEST);
@@ -81,23 +79,54 @@ int main()
 
 
 
-    ////ranodm comment jusat to push to github
-    // activate the window
     window.setActive(true);
-    // load resources, initialize the OpenGL states, ...
-    // initialize projection and view matrices
 
     static float anglex = 0.f;
     static float angley = 0.f;
-    static float distance = 100.f;
     sf::Vector2f previousMousePos;
     sf::Vector2i lastPosition;
 
-    float theta = 0.f; // camera's inclination angle (between 0 and 180 degrees)
-    float phi = 0.f; // camera's rotation angle (between 0 and 360 degrees)
     float r = 200.f; // camera's distance from the origin
 
 
+    // orbit parameters define 
+    float rp = 90.f; // promień perygeum w km
+    float ra = 200.f; // promień apogeum w km
+    float i = 30; // inklinacja w stopniach
+    float w = 45; // argument perygeum w stopniach
+    float W = 90; // węzeł wstępujący w stopniach
+    float T = 90 * 60; // czas okresu obiegu w sekundach
+
+    i = i * 3.1415926f / 180;
+    w = w * 3.1415926f / 180;
+    W = W * 3.1415926f / 180;
+
+    float a = (rp + ra) / 2; //semi-major axis
+    float b = a * sqrt(1 - pow((ra - rp) / (ra + rp), 2)); //semi-minor axis
+    float n = sqrt(398600.5 / pow((rp + ra) / 2, 3)); //mean motion
+    float e = sqrt(1 - pow(b / a, 2)); //eccentricity
+    //float E0 = 0;
+    //float M = 2 * 3.1415926f * fmod((glfwGetTime() / T), 1);
+    //float E = M;
+
+    //while (abs(E - E0) > 0.0001) {
+    //    E0 = E;
+    //    E = M + (ra - rp) * sin(E) / (a * b * sqrt(1 - pow(e, 2))) - E0;
+    //}
+
+    float x, y, z, cosi = cos(i), sini = sin(i), cosw = cos(w), sinw = sin(w), cosW = cos(W), sinW = sin(W);
+
+
+    std::cout << "rp(perigee radius): " << rp << std::endl;
+    std::cout << "ra(apogee radius): " << ra << std::endl;
+    std::cout << "i (inclination): " << i << " deg" << std::endl;
+    std::cout << "w (perigee argument): " << w << " deg" << std::endl;
+    std::cout << "W (Ascending Node): " << W << " deg" << std::endl;
+    std::cout << "T (Period): " << T << " sec" << std::endl;
+    std::cout << "a (semi-major axis): " << a << " km" << std::endl;
+    std::cout << "b (semi-minor axis): " << b << " km" << std::endl;
+    std::cout << "n (mean motion): " << n << " rad/sec" << std::endl;
+    std::cout << "e (eccentricity): " << e << std::endl;
 
     bool running = true;
     while (running)
@@ -109,8 +138,6 @@ int main()
         glLightfv(GL_LIGHT0, GL_POSITION, light_position);
         glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
         glEnable(GL_LIGHT0);
-
-        // handle events
         sf::Event event;
         while (window.pollEvent(event))
         {
@@ -160,52 +187,23 @@ int main()
             {
                 if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel)
                 {
-                    //window.zoom(1 - event.mouseWheelScroll.delta / 10.0f;
-                    //window.setView(view);
                     r -= event.mouseWheelScroll.delta * 10.f;
                 }
             }
         }
 
-        //std::cout << "angley: " << angley << std::endl; 
-
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        gluPerspective(60.f, (float)window.getSize().x / (float)window.getSize().y, 0.1f, 1000.f);
+        gluPerspective(64.f, (float)window.getSize().x / (float)window.getSize().y, 0.1f, 1000.f);
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
 
 
 
-        // Definicja parametrów orbity
-        float rp = 90.f; // promień perygeum w km
-        float ra = 200.f; // promień apogeum w km
-        float i = 30; // inklinacja w stopniach
-        float w = 45; // argument perygeum w stopniach
-        float W = 90; // węzeł wstępujący w stopniach
-        float T = 90 * 60; // czas okresu obiegu w sekundach
 
-        i = i * 3.1415926f / 180;
-        w = w * 3.1415926f / 180;
-        W = W * 3.1415926f / 180;
-
-        float a = (rp + ra) / 2;
-        float b = a * sqrt(1 - pow((ra - rp) / (ra + rp), 2));
-        float n = sqrt(398600.5 / pow((rp + ra) / 2, 3));
-        float e = sqrt(1 - pow(b / a, 2));
-        //float E0 = 0;
-        //float M = 2 * 3.1415926f * fmod((glfwGetTime() / T), 1);
-        //float E = M;
-
-        //while (abs(E - E0) > 0.0001) {
-        //    E0 = E;
-        //    E = M + (ra - rp) * sin(E) / (a * b * sqrt(1 - pow(e, 2))) - E0;
-        //}
-
-        float x, y, z, cosi = cos(i), sini = sin(i), cosw = cos(w), sinw = sin(w), cosW = cos(W), sinW = sin(W);
 
 
 
@@ -213,14 +211,12 @@ int main()
         cameraPosition.x = r * cos(anglex) * cos(angley);
         cameraPosition.y = r * sin(angley);
         cameraPosition.z = r * sin(anglex) * cos(angley);
-
         cameraTarget.x = 0;
         cameraTarget.y = 0;
         cameraTarget.z = 0;
         cameraUp.x = 0;
         cameraUp.y = 1;
         cameraUp.z = 0;
-
         gluLookAt(
             cameraPosition.x, cameraPosition.y, cameraPosition.z,
             cameraTarget.x, cameraTarget.y, cameraTarget.z,
@@ -233,25 +229,16 @@ int main()
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
         glTranslatef(0.f, 0.f, 0.f);
-        //glTranslatef(0.f, 0.f, distance);
-        //glRotatef(angleX, 0.f, 2.f, 0.f);
-        //glRotatef(angleZ, 2.f, 0.f, 0.f);
         glColor3f(1.f, 0.f, 0.f);
         glutSolidSphere(67.38f, 50, 50);
         glPopMatrix();
 
-
-
-        //2nd sphere just for prototypin
-        glPushMatrix();
-        glTranslatef(100.f, 0.f, 0.f);
-        //glTranslatef(0.f, 0.f, distance);
-        //glRotatef(angleX, 0.f, 2.f, 0.f);
-        //glRotatef(angleZ, 2.f, 0.f, 0.f);
-        glColor3f(1.f, 0.f, 0.f);
-        glutSolidSphere(20.f, 50, 50);
-        glPopMatrix();
-
+        ////2nd sphere just for prototypin
+        //glPushMatrix();
+        //glTranslatef(100.f, 0.f, 0.f);
+        //glColor3f(1.f, 0.f, 0.f);
+        //glutSolidSphere(20.f, 50, 50);
+        //glPopMatrix();
 
         //circle render data - to transform into an orbit
         //glDisable(GL_LIGHT0);
@@ -260,8 +247,6 @@ int main()
         glDisable(GL_LIGHTING);
         glColor3f(0.2f, 0.6f, 0.2f);
         glBegin(GL_LINE_LOOP);
-
-
         for (int i = 0; i <= 360; i++) {
             float theta = i * 3.1415926f / 180; // kąt w radianach
             float r = (a * (1 - pow(e, 2))) / (1 + e * cos(theta));
@@ -270,8 +255,6 @@ int main()
             z = r * (sini * sin(theta));
             glVertex3f(x, y, z);
         }
-
-
         // basic circle - orbit alpha version
         //for (int i = 0; i < 50; ++i)
         //{
@@ -361,7 +344,6 @@ int main()
 //    settings.antialiasingLevel = 8;
 //    settings.majorVersion = 3;
 //    settings.minorVersion = 0;
-//    // Utwórz okno renderowania
 //    sf::RenderWindow window(sf::VideoMode(800, 600), "Prosty silnik graficzny 3D");
 //
 //    // openGL parameters
@@ -400,7 +382,6 @@ int main()
 //    /*sf::Vector2i lastMousePos = sf::Mouse::getPosition();*/
 //    while (running)
 //    {
-//        // Obs³u¿ zdarzenia okna
 //        sf::Event event;
 //        while (window.pollEvent(event))
 //        {
@@ -503,12 +484,12 @@ int main()
 //
 //    return 0;
 //}
-
-
-
-
-
-
+//
+//
+//
+//
+//
+//
 //#include <iostream>
 //#include <SFML/Graphics.hpp>
 //
@@ -564,7 +545,7 @@ int main()
 //        float time = static_cast<float>(clock.getElapsedTime().asMilliseconds());
 //        float angle = time * 0.00001f;
 //        int index = static_cast<int>(angle / (2.f * M_PI) * orbit.getVertexCount());
-//        satellite.setPosition(orbit[index].position); //wyjatek 
+//        satellite.setPosition(orbit[index].position); 
 //
 //        window.clear();
 //        window.draw(planet);
