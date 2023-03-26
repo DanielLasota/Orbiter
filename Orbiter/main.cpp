@@ -54,16 +54,11 @@
 #include <GL/glut.h>
 #include <gl/GLU.h>
 #include <iostream>
-
+//#include <GLFW/glfw3.h>
 
 int main()
 {
-    sf::ContextSettings settings;
-    settings.depthBits = 24;
-    settings.stencilBits = 8;
-    settings.antialiasingLevel = 16;
-    settings.majorVersion = 3;
-    settings.minorVersion = 0;
+    
 
     // create the window
     sf::Window window(sf::VideoMode(800, 600), "OpenGL", sf::Style::Default, sf::ContextSettings(32));
@@ -71,6 +66,13 @@ int main()
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
     glEnable(GL_LIGHTING);
+
+    sf::ContextSettings settings;
+    settings.depthBits = 24;
+    settings.stencilBits = 8;
+    settings.antialiasingLevel = 8;
+    settings.majorVersion = 3;
+    settings.minorVersion = 0;
 
  
     // Camera initalise
@@ -166,9 +168,8 @@ int main()
             }
         }
 
-        std::cout << "angley: " << angley << std::endl;
+        //std::cout << "angley: " << angley << std::endl; 
 
-        // clear the buffers
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glMatrixMode(GL_PROJECTION);
@@ -177,6 +178,36 @@ int main()
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
+
+
+
+        // Definicja parametrów orbity
+        float rp = 90.f; // promień perygeum w km
+        float ra = 200.f; // promień apogeum w km
+        float i = 30; // inklinacja w stopniach
+        float w = 45; // argument perygeum w stopniach
+        float W = 90; // węzeł wstępujący w stopniach
+        float T = 90 * 60; // czas okresu obiegu w sekundach
+
+        i = i * 3.1415926f / 180;
+        w = w * 3.1415926f / 180;
+        W = W * 3.1415926f / 180;
+
+        float a = (rp + ra) / 2;
+        float b = a * sqrt(1 - pow((ra - rp) / (ra + rp), 2));
+        float n = sqrt(398600.5 / pow((rp + ra) / 2, 3));
+        float e = sqrt(1 - pow(b / a, 2));
+        //float E0 = 0;
+        //float M = 2 * 3.1415926f * fmod((glfwGetTime() / T), 1);
+        //float E = M;
+
+        //while (abs(E - E0) > 0.0001) {
+        //    E0 = E;
+        //    E = M + (ra - rp) * sin(E) / (a * b * sqrt(1 - pow(e, 2))) - E0;
+        //}
+
+        float x, y, z, cosi = cos(i), sini = sin(i), cosw = cos(w), sinw = sin(w), cosW = cos(W), sinW = sin(W);
+
 
 
         //sphere equation
@@ -197,6 +228,8 @@ int main()
             cameraUp.x, cameraUp.y, cameraUp.z
         );
 
+
+
         // draw 1st sphere
         glMatrixMode(GL_MODELVIEW);
         glPushMatrix();
@@ -205,7 +238,7 @@ int main()
         //glRotatef(angleX, 0.f, 2.f, 0.f);
         //glRotatef(angleZ, 2.f, 0.f, 0.f);
         glColor3f(1.f, 0.f, 0.f);
-        glutSolidSphere(50.f, 50, 50);
+        glutSolidSphere(67.38f, 50, 50);
         glPopMatrix();
 
 
@@ -221,38 +254,63 @@ int main()
         glPopMatrix();
 
 
-
-
-        //orbit render data - to transform into an orbit
+        //circle render data - to transform into an orbit
         //glDisable(GL_LIGHT0);
         glPushMatrix();
         glTranslatef(0.f, 0.f, 0.f);
         glDisable(GL_LIGHTING);
         glColor3f(0.2f, 0.6f, 0.2f);
         glBegin(GL_LINE_LOOP);
-        for (int i = 0; i < 50; ++i)
-        {
-            float theta = 2.0f * 3.1415926f * float(i) / float(50); // kąt w radianach
-            float x = 80 * cosf(theta); // współrzędna x punktu na okręgu //80 to promien orbity
-            float z = 80 * sinf(theta); // współrzędna z punktu na okręgu // 80 to promien orbity
-            glVertex3f(x, 0.f, z); // wierzchołek okręgu
+
+
+        for (int i = 0; i <= 360; i++) {
+            float theta = i * 3.1415926f / 180; // kąt w radianach
+            float r = (a * (1 - pow(e, 2))) / (1 + e * cos(theta));
+            x = r * (cosw * cos(theta) - sinw * sin(theta) * cosi);
+            y = r * (sinw * cos(theta) + cosw * sin(theta) * cosi);
+            z = r * (sini * sin(theta));
+            glVertex3f(x, y, z);
         }
+
+
+        // basic circle - orbit alpha version
+        //for (int i = 0; i < 50; ++i)
+        //{
+        //    float theta = 2.0f * 3.1415926f * float(i) / float(50); // kąt w radianach
+        //    float x = 80 * cosf(theta); // współrzędna x punktu na okręgu //80 to promien orbity
+        //    float z = 80 * sinf(theta); // współrzędna z punktu na okręgu // 80 to promien orbity
+        //    glVertex3f(x, 0.f, z); // wierzchołek okręgu
+        //}
         glEnd();
         glEnable(GL_LIGHTING);
         glPopMatrix();
 
-        // end the current frame (internally swaps the front and back buffers)
+
+
+
+        glPushMatrix();
+        glDisable(GL_LIGHTING);
+        glBegin(GL_LINES);
+        // X axis
+        glColor3f(1.f, 0.f, 0.f);
+        glVertex3f(0.f, 0.f, 0.f);
+        glVertex3f(100.f, 0.f, 0.f);
+        // Y axis
+        glColor3f(0.f, 1.f, 0.f);
+        glVertex3f(0.f, 0.f, 0.f);
+        glVertex3f(0.f, 100.f, 0.f);
+        // Z asix
+        glColor3f(0.f, 0.f, 1.f);
+        glVertex3f(0.f, 0.f, 0.f);
+        glVertex3f(0.f, 0.f, 100.f);
+        glEnd();
+        glEnable(GL_LIGHTING);
+        glPopMatrix();
         window.display();
     }
-
-    // release resources...
     glDisable(GL_LIGHTING);
     glDisable(GL_LIGHT0);
-
-    // deactivate the window and its context
     window.setActive(false);
-
-    // close the window
     window.close();
 
     return 0;
