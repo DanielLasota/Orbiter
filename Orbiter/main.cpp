@@ -1,7 +1,6 @@
 ﻿//Welcome to the orbiter alpha - early design phase orbital manager multi inbsturment unit
-//
 //This Soft is a Project universal design pattern to finish 
-//for target-satellite-ship whatever the fuck You want to throw out to orbit, 
+//for target-satellite-ship whatever the heck You want to throw out to orbit, 
 //but basiaclly for satellites with propulsion, tanks, navs etc.
 //The aim/goal is to combine common features of STS' FLIGHT INSTRUMENT MENU with Crew Dragon due to
 //the ship is ought to be steered manevuered, programmed by human unit on earth. 
