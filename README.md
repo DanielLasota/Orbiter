@@ -17,8 +17,6 @@ Simple - lightweight program to manage orbites and orbital trajectories.
 
 To add:
 
--define orbit in 3d
-
 -up to 10 objects on different orbit 
 
 -Parameters: orbital speed, apoapsis, periapsis, orbital period, time do apoapsis/periapsis, inclination, eccentricity, nodes
@@ -33,7 +31,7 @@ To add:
 
 -implement simple algorithm for reentry burn
 
--add navball
+-add navball / horizont (switchable)
 
 -add simulated input from 3 sensors & voting while outbound/malfunction
 
