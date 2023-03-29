@@ -68,15 +68,15 @@ void xyz_axis_draw()
     // X axis
     glColor3f(1.f, 0.f, 0.f);
     glVertex3f(0.f, 0.f, 0.f);
-    glVertex3f(100.f, 0.f, 0.f);
+    glVertex3f(10000.f, 0.f, 0.f);
     // Y axis
     glColor3f(0.f, 1.f, 0.f);
     glVertex3f(0.f, 0.f, 0.f);
-    glVertex3f(0.f, 100.f, 0.f);
+    glVertex3f(0.f, 10000.f, 0.f);
     // Z asix
     glColor3f(0.f, 0.f, 1.f);
     glVertex3f(0.f, 0.f, 0.f);
-    glVertex3f(0.f, 0.f, 100.f);
+    glVertex3f(0.f, 0.f, 10000.f);
     glEnd();
     glEnable(GL_LIGHTING);
 }
@@ -84,15 +84,15 @@ void earth_draw() {
     glPushMatrix();
     glTranslatef(0.f, 0.f, 0.f);
     glColor3f(1.f, 0.f, 0.f);
-    glutSolidSphere(67.38f, 50, 50);
+    glutSolidSphere(6738.f, 50, 50);
     glPopMatrix();
 }
 void moon_draw() {
         ////2nd sphere just for prototypin
         glPushMatrix();
-        glTranslatef(10000.f, 0.f, 0.f);
+        glTranslatef(80000.f, 0.f, 0.f);
         glColor3f(1.f, 0.f, 0.f);
-        glutSolidSphere(20.f, 50, 50);
+        glutSolidSphere(2000.f, 50, 50);
         glPopMatrix();
 }
 
@@ -105,7 +105,7 @@ int main()
         return 1;
     }
 
-    sf::RenderWindow window(sf::VideoMode(800, 600), "OpenGL", sf::Style::Default, sf::ContextSettings(32));
+    sf::RenderWindow window(sf::VideoMode(800, 600), "Orbiter", sf::Style::Default, sf::ContextSettings(32));
     window.setVerticalSyncEnabled(true);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -133,21 +133,21 @@ int main()
     sf::Vector2f previousMousePos;
     sf::Vector2i lastPosition;
 
-    float r = 800.f; // camera's distance from the origin
+    float r = 40000.f; // camera's distance from the origin
 
 
     // orbit parameters define 
-    float rp = 90.f; // promień perygeum w km
-    float ra = 200.f; // promień apogeum w km
-    float i = 30; // inklinacja w stopniach
+    float ap = 400.f;
+    float pe = 300.f;
+    float ra = 6738.f + ap; // promień perygeum w km
+    float rp = 6738.f + pe; // promień apogeum w km
+    float i = 90; // inklinacja w stopniach
     float w = 45; // argument perygeum w stopniach
     float W = 90; // węzeł wstępujący w stopniach
     float T = 90 * 60; // czas okresu obiegu w sekundach
-
     i = i * 3.1415926f / 180;
     w = w * 3.1415926f / 180;
     W = W * 3.1415926f / 180;
-
     float a = (rp + ra) / 2; //semi-major axis
     float b = a * sqrt(1 - pow((ra - rp) / (ra + rp), 2)); //semi-minor axis
     float n = sqrt(398600.5 / pow((rp + ra) / 2, 3)); //mean motion
@@ -162,10 +162,12 @@ int main()
     //}
 
     float x, y, z, cosi = cos(i), sini = sin(i), cosw = cos(w), sinw = sin(w), cosW = cos(W), sinW = sin(W);
+    //float x, y, z, cosi = cos(i_deg), sini = sin(i_deg), cosw = cos(w), sinw =
 
-
-    std::cout << "rp(perigee radius): " << rp << std::endl;
-    std::cout << "ra(apogee radius): " << ra << std::endl;
+    std::cout << "rp(perigee radius): " << rp << " km" << std::endl;
+    std::cout << "ra(apogee radius): " << ra << " km" << std::endl;
+    std::cout << "AP: " << ap << " km" << std::endl;
+    std::cout << "PE: " << pe << " km" << std::endl;
     std::cout << "i (inclination): " << i << " deg" << std::endl;
     std::cout << "w (perigee argument): " << w << " deg" << std::endl;
     std::cout << "W (Ascending Node): " << W << " deg" << std::endl;
@@ -179,11 +181,13 @@ int main()
     sf::View textView(sf::FloatRect(0, 0, window.getSize().x * 0.38, window.getSize().y));
     sf::Text orbit_data;
     orbit_data.setFont(eurostile);
-    orbit_data.setCharacterSize(14);
+    orbit_data.setCharacterSize(12);
     orbit_data.setFillColor(sf::Color::Green);
     std::stringstream oss;
-    oss << "rp(perigee radius): " << rp << std::endl
-        << "ra(apogee radius): " << ra << std::endl
+    oss << "RP: " << rp << " km" << std::endl
+        << "RA: " << ra << " km" << std::endl
+        << "AP: " << ap << " km" << std::endl
+        << "PE: " << pe << " km" << std::endl
         << "i (inclination): " << i << " deg" << std::endl
         << "w (perigee argument): " << w << " deg" << std::endl
         << "W (Ascending Node): " << W << " deg" << std::endl
@@ -192,8 +196,6 @@ int main()
         << "b (semi-minor axis): " << b << " km" << std::endl
         << "n (mean motion): " << n << " rad/sec" << std::endl
         << "e (eccentricity): " << e << std::endl;
-    
-    
     orbit_data.setString(oss.str());
     
 
@@ -202,7 +204,7 @@ int main()
     while (running)
     {
         // light source
-        GLfloat light_position[] = { 500.f, 0.f, 500.f, 1.f };
+        GLfloat light_position[] = { 50000.f, 0.f, 50000.f, 1.f };
         GLfloat light_diffuse[] = { 1.f, 1.f, 1.f, 1.f };
         glLightfv(GL_LIGHT0, GL_POSITION, light_position);
         glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
@@ -252,7 +254,7 @@ int main()
             {
                 if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel)
                 {
-                    r -= event.mouseWheelScroll.delta * 10.f;
+                    r -= event.mouseWheelScroll.delta * 1000.f;
                 }
             }
         }
@@ -261,7 +263,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        gluPerspective(64.f, (float)window.getSize().x / (float)window.getSize().y * 0.62, 10.f, 100000.f);
+        gluPerspective(64.f, (float)window.getSize().x / (float)window.getSize().y * 0.62, 10.f, 200000.f);
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
