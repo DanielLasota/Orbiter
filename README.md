@@ -1,21 +1,21 @@
 # Orbiter
 Simple - lightweight program to manage orbites and orbital trajectories.
 
-26.03 - Basic 3D engine ready, still rototyping orbital 3d engine (SFML && OpenGL) a'la SpaceX's Crew Dragon && STS Combined
+29.03 - Basic 3D engine ready. Orbital Render Ready. Orbital Data Panel Ready. Prototyping orbital data input and switchable orbit view - 3D - 2D ZX - cartograph
 
-26.03 - addin fotochromatic aberration & improvin camera's sphere equation trajectory
+29.03 - Addin object to be on orbit, addin parameters: Vessel (mass - dry/wet, DeltaV, Impulses, TWR etc), 
 
-26.03 - Specifying orbit parameters, input && orbit render
+29.03 - Linux && android port! 
 
-26.03 - Linux && android port! 
+30.03 - tryin to add fotochromatic aberration, nice depth of field etc
+
+
 
 
 
 ##########################################################
 
 To add:
-
--define orbit in 3d
 
 -up to 10 objects on different orbit 
 
@@ -31,7 +31,7 @@ To add:
 
 -implement simple algorithm for reentry burn
 
--add navball
+-add navball / horizont (switchable)
 
 -add simulated input from 3 sensors & voting while outbound/malfunction
 
