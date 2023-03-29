@@ -50,15 +50,62 @@
 
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
+#include <SFML/Graphics/Text.hpp>
 #include <GL/glut.h>
 #include <gl/GLU.h>
 #include <iostream>
+#include <sstream>
+#include <fstream>
+#include <iomanip>
+
 //#include <GLFW/glfw3.h>
+
+void xyz_axis_draw()
+{
+    glPushMatrix();
+    glDisable(GL_LIGHTING);
+    glBegin(GL_LINES);
+    // X axis
+    glColor3f(1.f, 0.f, 0.f);
+    glVertex3f(0.f, 0.f, 0.f);
+    glVertex3f(100.f, 0.f, 0.f);
+    // Y axis
+    glColor3f(0.f, 1.f, 0.f);
+    glVertex3f(0.f, 0.f, 0.f);
+    glVertex3f(0.f, 100.f, 0.f);
+    // Z asix
+    glColor3f(0.f, 0.f, 1.f);
+    glVertex3f(0.f, 0.f, 0.f);
+    glVertex3f(0.f, 0.f, 100.f);
+    glEnd();
+    glEnable(GL_LIGHTING);
+}
+void earth_draw() {
+    glPushMatrix();
+    glTranslatef(0.f, 0.f, 0.f);
+    glColor3f(1.f, 0.f, 0.f);
+    glutSolidSphere(67.38f, 50, 50);
+    glPopMatrix();
+}
+void moon_draw() {
+        ////2nd sphere just for prototypin
+        glPushMatrix();
+        glTranslatef(10000.f, 0.f, 0.f);
+        glColor3f(1.f, 0.f, 0.f);
+        glutSolidSphere(20.f, 50, 50);
+        glPopMatrix();
+}
 
 int main()
 {
-    
-    sf::Window window(sf::VideoMode(800, 600), "OpenGL", sf::Style::Default, sf::ContextSettings(32));
+    sf::Font eurostile;
+    if (!eurostile.loadFromFile("C:/Users/Devxd/Desktop/EurostileExtended.ttf"))
+    {
+        std::cerr << "Could not load font." << std::endl;
+        return 1;
+    }
+
+    sf::RenderWindow window(sf::VideoMode(800, 600), "OpenGL", sf::Style::Default, sf::ContextSettings(32));
     window.setVerticalSyncEnabled(true);
     glEnable(GL_DEPTH_TEST);
     glDepthFunc(GL_LESS);
@@ -86,7 +133,7 @@ int main()
     sf::Vector2f previousMousePos;
     sf::Vector2i lastPosition;
 
-    float r = 200.f; // camera's distance from the origin
+    float r = 800.f; // camera's distance from the origin
 
 
     // orbit parameters define 
@@ -128,10 +175,32 @@ int main()
     std::cout << "n (mean motion): " << n << " rad/sec" << std::endl;
     std::cout << "e (eccentricity): " << e << std::endl;
 
+
+    sf::View textView(sf::FloatRect(0, 0, window.getSize().x * 0.38, window.getSize().y));
+    sf::Text orbit_data;
+    orbit_data.setFont(eurostile);
+    orbit_data.setCharacterSize(14);
+    orbit_data.setFillColor(sf::Color::Green);
+    std::stringstream oss;
+    oss << "rp(perigee radius): " << rp << std::endl
+        << "ra(apogee radius): " << ra << std::endl
+        << "i (inclination): " << i << " deg" << std::endl
+        << "w (perigee argument): " << w << " deg" << std::endl
+        << "W (Ascending Node): " << W << " deg" << std::endl
+        << "T (Period): " << T << " sec" << std::endl
+        << "a (semi-major axis): " << a << " km" << std::endl
+        << "b (semi-minor axis): " << b << " km" << std::endl
+        << "n (mean motion): " << n << " rad/sec" << std::endl
+        << "e (eccentricity): " << e << std::endl;
+    
+    
+    orbit_data.setString(oss.str());
+    
+
+
     bool running = true;
     while (running)
     {
-
         // light source
         GLfloat light_position[] = { 500.f, 0.f, 500.f, 1.f };
         GLfloat light_diffuse[] = { 1.f, 1.f, 1.f, 1.f };
@@ -143,7 +212,6 @@ int main()
         {
             if (event.type == sf::Event::Closed)
             {
-                // end the program
                 running = false;
             }
             else if (event.type == sf::Event::Resized)
@@ -157,15 +225,12 @@ int main()
             }
             else if (event.type == sf::Event::MouseMoved && sf::Mouse::isButtonPressed(sf::Mouse::Left))
             {
-
                 // actual & last coursor position difference
                 sf::Vector2i delta = sf::Mouse::getPosition(window) - lastPosition;
-                // rotate
                 anglex += delta.x * -0.01f;
                 angley += delta.y * -0.01f;
                 //window.setView(view);
                 lastPosition = sf::Mouse::getPosition(window);
-
                 //if (anglex > 360.f)
                 //{
                 //    anglex -= 360.f;
@@ -191,23 +256,17 @@ int main()
                 }
             }
         }
-
+        
+        glViewport(window.getSize().x * 0.38, 0, window.getSize().x * 0.62, window.getSize().y);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
         glMatrixMode(GL_PROJECTION);
         glLoadIdentity();
-        gluPerspective(64.f, (float)window.getSize().x / (float)window.getSize().y, 0.1f, 1000.f);
+        gluPerspective(64.f, (float)window.getSize().x / (float)window.getSize().y * 0.62, 10.f, 100000.f);
 
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
 
-
-
-
-
-
-
-        //sphere equation
+        //camera sphere equation
         cameraPosition.x = r * cos(anglex) * cos(angley);
         cameraPosition.y = r * sin(angley);
         cameraPosition.z = r * sin(anglex) * cos(angley);
@@ -222,23 +281,9 @@ int main()
             cameraTarget.x, cameraTarget.y, cameraTarget.z,
             cameraUp.x, cameraUp.y, cameraUp.z
         );
-
-
-
-        // draw 1st sphere
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glTranslatef(0.f, 0.f, 0.f);
-        glColor3f(1.f, 0.f, 0.f);
-        glutSolidSphere(67.38f, 50, 50);
-        glPopMatrix();
-
-        ////2nd sphere just for prototypin
-        //glPushMatrix();
-        //glTranslatef(100.f, 0.f, 0.f);
-        //glColor3f(1.f, 0.f, 0.f);
-        //glutSolidSphere(20.f, 50, 50);
-        //glPopMatrix();
+       
+        earth_draw();
+        moon_draw();
 
         //circle render data - to transform into an orbit
         //glDisable(GL_LIGHT0);
@@ -264,29 +309,17 @@ int main()
         //    glVertex3f(x, 0.f, z); // wierzchołek okręgu
         //}
         glEnd();
-        glEnable(GL_LIGHTING);
-        glPopMatrix();
+        xyz_axis_draw();
+
+
+        window.pushGLStates();
+        window.draw(orbit_data);
+        window.popGLStates();
 
 
 
 
-        glPushMatrix();
-        glDisable(GL_LIGHTING);
-        glBegin(GL_LINES);
-        // X axis
-        glColor3f(1.f, 0.f, 0.f);
-        glVertex3f(0.f, 0.f, 0.f);
-        glVertex3f(100.f, 0.f, 0.f);
-        // Y axis
-        glColor3f(0.f, 1.f, 0.f);
-        glVertex3f(0.f, 0.f, 0.f);
-        glVertex3f(0.f, 100.f, 0.f);
-        // Z asix
-        glColor3f(0.f, 0.f, 1.f);
-        glVertex3f(0.f, 0.f, 0.f);
-        glVertex3f(0.f, 0.f, 100.f);
-        glEnd();
-        glEnable(GL_LIGHTING);
+
         glPopMatrix();
         window.display();
     }

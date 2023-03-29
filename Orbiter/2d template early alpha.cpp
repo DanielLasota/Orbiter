@@ -1,147 +1,118 @@
+//Welcome to the orbiter alpha - early design phase orbital manager multi inbsturment unit
+//This Soft is a Project universal design pattern to finish 
+//for target-satellite-ship whatever the heck You want to throw out to orbit, 
+//but basiaclly for satellites with propulsion, tanks, navs etc.
+//The aim/goal is to combine common features of STS' FLIGHT INSTRUMENT MENU with Crew Dragon due to
+//the ship is ought to be steered manevuered, programmed by human unit on earth. 
+// 
+//##############################################################################
+//##############################################################################
+// 
+//There are two reasons why it is not ideal to use archaic Apollo steering low - level 
+//managing programs with a count of 200. Firstly, we now have processors in our phones 
+//that are orders of magnitude faster it gives us the possibility to have access to a lot more sensor inputs
+// managing them more quickly, reliable etc, 
+//and most importantly, we are now in the 2020s, so it would be better to use modern software 
+//to render 3D orbits in the style of Crew Dragon, with options for 2D projections 
+//from both above and the side.
+// 
+////##############################################################################
+//##############################################################################
+// 
+//It's important to consider the fact that the ship will be controlled from 
+//Earth by human resources, and SpaceX uses different software for managing 
+//orbit programs from the control center, which are then sent to the ship. 
+//There is also different software for onboard instruments to manage and 
+//program orbits, maneuvers, and docking. Docking is usually automatic, 
+//but astronauts are trained to dock manually, so there is an option for manual docking.
+//
+//Therefore, the two goals are to aim for simplicity and 
+//minimalistic design, similar to the STS program, while also 
+//embracing modernity and using software similar to that of Crew Dragon.
+// 
+// //##############################################################################
+//##############################################################################
+//
+//PLANNED LAYERS:
+//1. 3D orbit view with details /////// 2D 2 projections - upper and side vies(to realise inclination) - changeable
+//2. Window with side data - orbit data, speed, time, inclination, nodes, time to apoapsis/periapsis etc
+//3. Earth flat map with ship trajectory mode
+// 
+// 
+// 
+//4. Navball
+//5. Manevuering Panel - a'la spacex
+//6. log - events - event time - fault panel
+//7. Engine Panel - with fuel, basic data such as hydraulic fluid temp, amount, etc
+//8. Buses Data + APU + Energetics etc
+
+
+
+#include <SFML/Graphics.hpp>
+#include <SFML/OpenGL.hpp>
 #include <GL/glut.h>
-#include <cmath>
-#include <cstdlib>
-#include <cstdio>
+#include <gl/GLU.h>
+#include <iostream>
+//#include <GLFW/glfw3.h>
 
-const float PI = 3.14159f;
-float camera_theta = 2.042033;
-float camera_phi = 8.639376;
-float camera_r = 15;
-
-double aspect_ratio = 0;
-
-void reshape(int w, int h)
+int main()
 {
-    aspect_ratio = (double)w / (double)h;
-    glViewport(0, 0, w, h);
-}
 
-void setupmywindow()
-{
-    glClearColor(1, 1, 1, 0);
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-}
-
-void myaxes(double size)
-{
-    glBegin(GL_LINES);
-    glColor3f(0, 0, 0);
-    glVertex3f(0, 0, 0);
-    glColor3f(1, 0, 0);
-    glVertex3f(size, 0, 0); //x-axis
-
-    glColor3f(0, 0, 0);
-    glVertex3f(0, 0, 0);
-    glColor3f(0, 1, 0);
-    glVertex3f(0, size, 0); //y-axis
-
-    glColor3f(0, 0, 0);
-    glVertex3f(0, 0, 0);
-    glColor3f(0, 0, 1);
-    glVertex3f(0, 0, size); //z-axis
-    glEnd();
-}
-
-void sphere(float radius)
-{
-    float z1, x1, y1, z2, x2, y2, z3, x3, y3, z4, x4, y4;
-
-    float dtheta = PI / 20;
-    float dphi = PI / 20;
-
-    glBegin(GL_QUADS);
-    for (float theta = 0; theta <= 2.0 * PI; theta += dtheta)
-    {
-        for (float phi = 0; phi <= PI; phi += dphi)
-        {
-            z1 = radius * sin(phi + dphi) * cos(theta + dtheta);
-            x1 = radius * sin(phi + dphi) * sin(theta + dtheta);
-            y1 = radius * cos(phi + dphi);
-
-            z2 = radius * sin(phi) * cos(theta + dtheta);
-            x2 = radius * sin(phi) * sin(theta + dtheta);
-            y2 = radius * cos(phi);
-
-            z3 = radius * sin(phi) * cos(theta);
-            x3 = radius * sin(phi) * sin(theta);
-            y3 = radius * cos(phi);
-
-            z4 = radius * sin(phi + dphi) * cos(theta);
-            x4 = radius * sin(phi + dphi) * sin(theta);
-            y4 = radius * cos(phi + dphi);
-
-            glColor3f(1, 0, 0);
-            glVertex3f(x4, y4, z4);
-            glVertex3f(x1, y1, z1);
-            glVertex3f(x2, y2, z2);
-            glVertex3f(x3, y3, z3);
-        }
-    }
-    glEnd();
-}
-
-void display(void)
-{
+    sf::Window window(sf::VideoMode(800, 600), "OpenGL", sf::Style::Default, sf::ContextSettings(32));
+    window.setVerticalSyncEnabled(true);
     glEnable(GL_DEPTH_TEST);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_LIGHTING);
 
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-    gluPerspective(45, aspect_ratio, 1, 100);
+    sf::ContextSettings settings;
+    settings.depthBits = 24;
+    settings.stencilBits = 8;
+    settings.antialiasingLevel = 8;
+    settings.majorVersion = 3;
+    settings.minorVersion = 0;
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
+    window.setActive(true);
 
-    // spherical coordinate camera transform, +Z is "up"
-    glTranslatef(0, 0, -camera_r);
-    glRotatef((camera_theta - PI) * (180.0f / PI), 1, 0, 0);
-    glRotatef(-camera_phi * (180.0f / PI), 0, 0, 1);
+    static float anglex = 0.f;
+    static float angley = 0.f;
+    sf::Vector2f previousMousePos;
+    sf::Vector2i lastPosition;
 
-    sphere(2);
-    myaxes(5);
-    glutSwapBuffers();
-}
 
-void mykeyboardcontrol(unsigned char key, int x, int y)
-{
-    switch (key) {
-    case 'r': camera_r += 0.1; break; //increase radius
-    case 'p': camera_r -= 0.1; break; //decrease radius
+    bool running = true;
+    while (running)
+    {
+        sf::Event event;
+        while (window.pollEvent(event))
+        {
+            if (event.type == sf::Event::Closed)
+            {
+                // end the program
+                running = false;
+            }
+            else if (event.type == sf::Event::Resized)
+            {
+                // adjust the viewport when the window is resized
+                glViewport(0, 0, event.size.width, event.size.height);
+            }
+            if (event.type == sf::Event::MouseButtonPressed && event.mouseButton.button == sf::Mouse::Left)
+            {
+                lastPosition = sf::Mouse::getPosition(window);
+            }
+            else if (event.type == sf::Event::MouseWheelScrolled)
+            {
+                if (event.mouseWheelScroll.wheel == sf::Mouse::VerticalWheel)
+                {
+                    r -= event.mouseWheelScroll.delta * 10.f;
+                }
+            }
+        }
 
-    case 'i': camera_theta += PI / 20; break;//increase theta angle
-    case 'k': camera_theta -= PI / 20; break;//increase theta angle
-    case 'j': camera_phi -= PI / 20; break;//increase phi angle
-    case 'l': camera_phi += PI / 20; break;//increase phi angle
     }
-    printf("r=%f  theta=%f  phi=%f\n", camera_r, camera_theta, camera_phi);
-    if (key == 27) exit(0);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_LIGHT0);
+    window.setActive(false);
+    window.close();
 
-    // clamp theta 
-    if (camera_theta < 0) camera_theta = 0;
-    if (camera_theta > PI) camera_theta = PI;
-
-    // wrap phi
-    if (camera_phi > 2 * PI) camera_phi -= 2 * PI;
-    if (camera_phi < 2 * PI) camera_phi += 2 * PI;
-
-    printf("r=%f  theta=%f  phi=%f\n", camera_r, camera_theta, camera_phi);
-
-    glutPostRedisplay();
-}
-
-int main(int argc, char** argv)
-{
-    glutInit(&argc, argv);
-    glutInitDisplayMode(GLUT_RGBA | GLUT_DEPTH | GLUT_DOUBLE);
-
-    glutInitWindowSize(400, 400);
-    glutCreateWindow("Sphere");
-
-    glutDisplayFunc(display);
-    glutReshapeFunc(reshape);
-    glutKeyboardFunc(mykeyboardcontrol);
-
-    setupmywindow();
-    glutMainLoop();
     return 0;
 }
