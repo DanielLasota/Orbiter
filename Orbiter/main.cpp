@@ -47,7 +47,6 @@
 //8. Buses Data + APU + Energetics etc
 
 
-
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 #include <SFML/Graphics/Text.hpp>
@@ -55,10 +54,11 @@
 #include <gl/GLU.h>
 #include <iostream>
 #include <sstream>
-#include <fstream>
 #include <iomanip>
+#include <string>
+#include <curl/curl.h>
+#include <ctime>
 
-//#include <GLFW/glfw3.h>
 
 void xyz_axis_draw()
 {
@@ -96,6 +96,8 @@ void moon_draw() {
         glPopMatrix();
 }
 
+
+
 int main()
 {
     sf::Font eurostile;
@@ -118,7 +120,8 @@ int main()
     settings.majorVersion = 3;
     settings.minorVersion = 0;
 
- 
+
+
     // Camera initalise
     sf::Vector3f cameraPosition(0.f, 0.f, 500.f);
     sf::Vector3f cameraTarget(0.f, 0.f, 0.f);
@@ -137,17 +140,18 @@ int main()
 
 
     // orbit parameters define 
-    float ap = 400.f;
-    float pe = 300.f;
+    float ap = 1600.658f;
+    float pe = 110.213f;
+    
     float ra = 6738.f + ap; // promień perygeum w km
     float rp = 6738.f + pe; // promień apogeum w km
-    float i = 90; // inklinacja w stopniach
-    float w = 45; // argument perygeum w stopniach
-    float W = 90; // węzeł wstępujący w stopniach
+    float i_deg = 60; // inklinacja w stopniach
+    float w_deg = 0; // argument perygeum w stopniach
+    float W_deg = 60; // węzeł wstępujący w stopniach
     float T = 90 * 60; // czas okresu obiegu w sekundach
-    i = i * 3.1415926f / 180;
-    w = w * 3.1415926f / 180;
-    W = W * 3.1415926f / 180;
+    float i = i_deg * 3.1415926f / 180;
+    float w = w_deg * 3.1415926f / 180;
+    float W = W_deg * 3.1415926f / 180;
     float a = (rp + ra) / 2; //semi-major axis
     float b = a * sqrt(1 - pow((ra - rp) / (ra + rp), 2)); //semi-minor axis
     float n = sqrt(398600.5 / pow((rp + ra) / 2, 3)); //mean motion
@@ -161,14 +165,16 @@ int main()
     //    E = M + (ra - rp) * sin(E) / (a * b * sqrt(1 - pow(e, 2))) - E0;
     //}
 
+    if (pe > ap)
+        return 0;
     float x, y, z, cosi = cos(i), sini = sin(i), cosw = cos(w), sinw = sin(w), cosW = cos(W), sinW = sin(W);
     //float x, y, z, cosi = cos(i_deg), sini = sin(i_deg), cosw = cos(w), sinw =
 
-    std::cout << "rp(perigee radius): " << rp << " km" << std::endl;
-    std::cout << "ra(apogee radius): " << ra << " km" << std::endl;
-    std::cout << "AP: " << ap << " km" << std::endl;
-    std::cout << "PE: " << pe << " km" << std::endl;
-    std::cout << "i (inclination): " << i << " deg" << std::endl;
+    std::cout << "rp(perigee radius): " << rp  << " m" << std::endl;
+    std::cout << "ra(apogee radius): " << ra << " m" << std::endl;
+    std::cout << "AP: " << ap * 1000 << " m" << std::endl;
+    std::cout << "PE: " << pe * 1000 << " m" << std::endl;
+    std::cout << "i (inclination): " << i_deg << " deg" << std::endl;
     std::cout << "w (perigee argument): " << w << " deg" << std::endl;
     std::cout << "W (Ascending Node): " << W << " deg" << std::endl;
     std::cout << "T (Period): " << T << " sec" << std::endl;
@@ -184,11 +190,12 @@ int main()
     orbit_data.setCharacterSize(12);
     orbit_data.setFillColor(sf::Color::Green);
     std::stringstream oss;
-    oss << "RP: " << rp << " km" << std::endl
+    oss << "usno time: " << std::endl
+        << "RP: " << rp << " km" << std::endl
         << "RA: " << ra << " km" << std::endl
-        << "AP: " << ap << " km" << std::endl
-        << "PE: " << pe << " km" << std::endl
-        << "i (inclination): " << i << " deg" << std::endl
+        << "AP: " << ap * 1000 << " m" << std::endl
+        << "PE: " << pe * 1000 << " m" << std::endl
+        << "i (inclination): " << i_deg << " deg" << std::endl
         << "w (perigee argument): " << w << " deg" << std::endl
         << "W (Ascending Node): " << W << " deg" << std::endl
         << "T (Period): " << T << " sec" << std::endl
@@ -300,6 +307,10 @@ int main()
             x = r * (cosw * cos(theta) - sinw * sin(theta) * cosi);
             y = r * (sinw * cos(theta) + cosw * sin(theta) * cosi);
             z = r * (sini * sin(theta));
+            //float temp_x = x * cosW - y * sinW;
+            //float temp_y = x * sinW + y * cosW;
+            //x = temp_x;
+            //y = temp_y;
             glVertex3f(x, y, z);
         }
         // basic circle - orbit alpha version
@@ -313,14 +324,9 @@ int main()
         glEnd();
         xyz_axis_draw();
 
-
         window.pushGLStates();
         window.draw(orbit_data);
         window.popGLStates();
-
-
-
-
 
         glPopMatrix();
         window.display();
