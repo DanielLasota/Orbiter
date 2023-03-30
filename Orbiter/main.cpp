@@ -46,7 +46,7 @@
 //7. Engine Panel - with fuel, basic data such as hydraulic fluid temp, amount, etc
 //8. Buses Data + APU + Energetics etc
 
-
+#include <boost/asio.hpp>
 #include <SFML/Graphics.hpp>
 #include <SFML/OpenGL.hpp>
 #include <SFML/Graphics/Text.hpp>
@@ -57,8 +57,15 @@
 #include <iomanip>
 #include <string>
 #include <curl/curl.h>
+#include <array>
 #include <ctime>
+#include <boost/asio.hpp>
 
+using boost::asio::ip::udp;
+
+const uint32_t NTP_TIMESTAMP_DELTA = 2208988800ull;
+const size_t recv_time_offset = 32;
+const size_t xmit_time_offset = 40;
 
 void xyz_axis_draw()
 {
@@ -97,6 +104,46 @@ void moon_draw() {
 }
 
 
+time_t get_ntp_time(const std::string& server_address)
+{
+    try
+    {
+        boost::asio::io_context io_context;
+
+        udp::resolver resolver(io_context);
+        udp::resolver::query query(udp::v4(), server_address, "ntp");
+
+        udp::endpoint receiver_endpoint = *resolver.resolve(query);
+
+        udp::socket socket(io_context);
+        socket.open(udp::v4());
+        socket.connect(receiver_endpoint);
+
+        std::array<uint8_t, 48> buffer;
+        buffer.fill(0);
+        buffer[0] = 0x1b;
+        socket.send(boost::asio::buffer(buffer));
+
+        std::array<uint8_t, 1024> reply_buffer;
+        udp::endpoint sender_endpoint;
+        size_t reply_length = socket.receive_from(boost::asio::buffer(reply_buffer), sender_endpoint);
+        uint32_t receive_timestamp = (reply_buffer[recv_time_offset] << 24) |
+            (reply_buffer[recv_time_offset + 1] << 16) |
+            (reply_buffer[recv_time_offset + 2] << 8) |
+            (reply_buffer[recv_time_offset + 3]);
+        double receive_timestamp_seconds = static_cast<double>(receive_timestamp) - NTP_TIMESTAMP_DELTA;
+        time_t receive_time = static_cast<time_t>(receive_timestamp_seconds);
+
+        socket.close();
+
+        return receive_time;
+    }
+    catch (std::exception& e)
+    {
+        std::cerr << "Wystąpił błąd: " << e.what() << std::endl;
+        return 0;
+    }
+}
 
 int main()
 {
@@ -120,15 +167,10 @@ int main()
     settings.majorVersion = 3;
     settings.minorVersion = 0;
 
-
-
     // Camera initalise
     sf::Vector3f cameraPosition(0.f, 0.f, 500.f);
     sf::Vector3f cameraTarget(0.f, 0.f, 0.f);
     sf::Vector3f cameraUp(0.f, 1.f, 0.f);
-
-
-
     window.setActive(true);
 
     static float anglex = 0.f;
@@ -175,8 +217,8 @@ int main()
     std::cout << "AP: " << ap * 1000 << " m" << std::endl;
     std::cout << "PE: " << pe * 1000 << " m" << std::endl;
     std::cout << "i (inclination): " << i_deg << " deg" << std::endl;
-    std::cout << "w (perigee argument): " << w << " deg" << std::endl;
-    std::cout << "W (Ascending Node): " << W << " deg" << std::endl;
+    std::cout << "w (perigee argument): " << w_deg << " deg" << std::endl;
+    std::cout << "W (Ascending Node): " << W_deg << " deg" << std::endl;
     std::cout << "T (Period): " << T << " sec" << std::endl;
     std::cout << "a (semi-major axis): " << a << " km" << std::endl;
     std::cout << "b (semi-minor axis): " << b << " km" << std::endl;
@@ -193,14 +235,14 @@ int main()
     oss << "usno time: " << std::endl
         << "RP: " << rp << " km" << std::endl
         << "RA: " << ra << " km" << std::endl
-        << "AP: " << ap * 1000 << " m" << std::endl
-        << "PE: " << pe * 1000 << " m" << std::endl
+        << "AP: " << ap << " km" << std::endl
+        << "PE: " << pe << " km" << std::endl
         << "i (inclination): " << i_deg << " deg" << std::endl
-        << "w (perigee argument): " << w << " deg" << std::endl
-        << "W (Ascending Node): " << W << " deg" << std::endl
+        << "w (perigee argument): " << w_deg << " deg" << std::endl
+        << "W (Ascending Node): " << W_deg << " deg" << std::endl
         << "T (Period): " << T << " sec" << std::endl
-        << "a (semi-major axis): " << a << " km" << std::endl
-        << "b (semi-minor axis): " << b << " km" << std::endl
+        << "a (semi-major axis): " << a * 1000 << " km" << std::endl
+        << "b (semi-minor axis): " << b * 1000 << " km" << std::endl
         << "n (mean motion): " << n << " rad/sec" << std::endl
         << "e (eccentricity): " << e << std::endl;
     orbit_data.setString(oss.str());
