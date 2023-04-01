@@ -68,6 +68,7 @@ using udp = boost::asio::ip::udp;
 const uint32_t NTP_TIMESTAMP_DELTA = 2208988800ull;
 const size_t recv_time_offset = 32;
 const size_t xmit_time_offset = 40;
+std::atomic<time_t> downloaded_time;
 
 void xyz_axis_draw()
 {
@@ -104,6 +105,16 @@ void moon_draw() {
         glutSolidSphere(2000.f, 50, 50);
         glPopMatrix();
 }
+std::string sys_time()
+{
+    auto now = std::chrono::system_clock::now();
+    std::time_t time_now = std::chrono::system_clock::to_time_t(now);
+    std::tm timeinfo;
+    localtime_s(&timeinfo, &time_now);
+    char buffer[80];
+    std::strftime(buffer, 80, "%H:%M:%S", &timeinfo);
+    return buffer;
+}
 time_t get_ntp_time(const std::string& server_address)
 {
     try
@@ -132,8 +143,8 @@ time_t get_ntp_time(const std::string& server_address)
             (reply_buffer[recv_time_offset + 2] << 8) |
             (reply_buffer[recv_time_offset + 3]);
         double receive_timestamp_seconds = static_cast<double>(receive_timestamp) - NTP_TIMESTAMP_DELTA;
+        downloaded_time = static_cast<time_t>(receive_timestamp_seconds);
         time_t receive_time = static_cast<time_t>(receive_timestamp_seconds);
-
         socket.close();
 
         return receive_time;
@@ -144,29 +155,26 @@ time_t get_ntp_time(const std::string& server_address)
         return 0;
     }
 }
-std::string nist_time(std::string server_address)
-{
-    time_t ntp_time = get_ntp_time("time-a-g.nist.gov");
+std::string tohms(time_t n) {
+    time_t ntp_time = n;
     struct tm timeinfo;
     localtime_s(&timeinfo, &ntp_time);
     char buffer[80];
     strftime(buffer, 80, "%H:%M:%S", &timeinfo);
-    //std::cout << "Czas: " << buffer << std::endl;
     return buffer;
 }
-std::string sys_time()
-{
-    auto now = std::chrono::system_clock::now();
-    std::time_t time_now = std::chrono::system_clock::to_time_t(now);
-    std::tm timeinfo;
-    localtime_s(&timeinfo, &time_now);
-    char buffer[80];
-    std::strftime(buffer, 80, "%H:%M:%S", &timeinfo);
-    return buffer;
+void clock_engine() {
+    while (true) {
+        downloaded_time++;
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
 }
+
 
 int main()
 {
+    std::thread t(clock_engine);
+
     sf::Font eurostile;
     if (!eurostile.loadFromFile("C:/Users/Devxd/Desktop/EurostileExtended.ttf"))
     {
@@ -176,9 +184,9 @@ int main()
     
     std::string link = "time-a-g.nist.gov";
     std::cout << get_ntp_time(link) << std::endl;
-    std::cout << "NIST TIME:" << nist_time(link) << std::endl;
+    std::cout << "NIST TIME:" << tohms(downloaded_time) << std::endl;
     std::cout << "SYS TIME : " << sys_time();
-
+    
     sf::RenderWindow window(sf::VideoMode(800, 600), "Orbiter", sf::Style::Default, sf::ContextSettings(32));
     window.setVerticalSyncEnabled(true);
     glEnable(GL_DEPTH_TEST);
@@ -236,7 +244,7 @@ int main()
         return 0;
     float x, y, z, cosi = cos(i), sini = sin(i), cosw = cos(w), sinw = sin(w), cosW = cos(W), sinW = sin(W);
     //float x, y, z, cosi = cos(i_deg), sini = sin(i_deg), cosw = cos(w), sinw =
-
+    
     std::cout << "rp(perigee radius): " << rp  << " m" << std::endl;
     std::cout << "ra(apogee radius): " << ra << " m" << std::endl;
     std::cout << "AP: " << ap * 1000 << " m" << std::endl;
@@ -257,8 +265,8 @@ int main()
     orbit_data.setCharacterSize(12);
     orbit_data.setFillColor(sf::Color::Green);
     std::stringstream oss;
-    oss << "NIST time: " << nist_time(link) << std::endl
-        //<< "NIST time CLOCK UPDATE: " << start_clock(link) << std::endl
+    oss << "Start NIST time: " << tohms(get_ntp_time("time-a-g.nist.gov")) << std::endl
+        << "NIST time: " << tohms(downloaded_time) << std::endl
         << "sys_time: " << sys_time() << std::endl
         << "RP: " << rp << " km" << std::endl
         << "RA: " << ra << " km" << std::endl
@@ -270,7 +278,7 @@ int main()
         << "T (Period): " << T << " sec" << std::endl
         << "a (semi-major axis): " << a * 1000 << " km" << std::endl
         << "b (semi-minor axis): " << b * 1000 << " km" << std::endl
-        << "n (mean motion): " << n << " rad/sec" << std::endl
+        << "n (mean motion): " << n << " rad/sec xDDDDDDDDDDDDDDDDDDDDDDD" << std::endl
         << "e (eccentricity): " << e << std::endl;
     orbit_data.setString(oss.str());
     
@@ -278,6 +286,10 @@ int main()
     bool running = true;
     while (running)
     {
+        std::cout << "tohms(downloaded_time): " << tohms(downloaded_time) << std::endl;
+
+
+
         // light source
         GLfloat light_position[] = { 50000.f, 0.f, 50000.f, 1.f };
         GLfloat light_diffuse[] = { 1.f, 1.f, 1.f, 1.f };
@@ -391,11 +403,9 @@ int main()
         //}
         glEnd();
         xyz_axis_draw();
-
         window.pushGLStates();
         window.draw(orbit_data);
         window.popGLStates();
-        //std::cout << nist_time(link) << std::endl;
         glPopMatrix();
         window.display();
     }
@@ -404,6 +414,8 @@ int main()
     window.setActive(false);
     window.close();
 
+
+    t.join();
     return 0;
 }
 
