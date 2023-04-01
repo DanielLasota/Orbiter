@@ -58,6 +58,8 @@
 #include <ctime>
 #include <chrono>
 #include <thread>
+#include <iomanip>
+#include <ios>
 //#include <iomanip>
 //#include <curl/curl.h>
 //#include <boost/asio.hpp>
@@ -265,20 +267,25 @@ int main()
     orbit_data.setCharacterSize(12);
     orbit_data.setFillColor(sf::Color::Green);
     std::stringstream oss;
-    oss << "Start NIST time: " << tohms(get_ntp_time("time-a-g.nist.gov")) << std::endl
+    oss << std::fixed << std::setprecision(3)
+        << "Start NIST time: " << tohms(get_ntp_time("time-a-g.nist.gov")) << std::endl
         << "NIST time: " << tohms(downloaded_time) << std::endl
         << "sys_time: " << sys_time() << std::endl
         << "RP: " << rp << " km" << std::endl
         << "RA: " << ra << " km" << std::endl
         << "AP: " << ap << " km" << std::endl
         << "PE: " << pe << " km" << std::endl
+
+        << std::defaultfloat
         << "i (inclination): " << i_deg << " deg" << std::endl
         << "w (perigee argument): " << w_deg << " deg" << std::endl
         << "W (Ascending Node): " << W_deg << " deg" << std::endl
-        << "T (Period): " << T << " sec" << std::endl
+
+        << std::fixed << std::setprecision(3)
+        << "T (Period): " << T << " sec" << std::endl        
         << "a (semi-major axis): " << a * 1000 << " km" << std::endl
         << "b (semi-minor axis): " << b * 1000 << " km" << std::endl
-        << "n (mean motion): " << n << " rad/sec xDDDDDDDDDDDDDDDDDDDDDDD" << std::endl
+        << "n (mean motion): " << n << " rad/sec" << std::endl
         << "e (eccentricity): " << e << std::endl;
     orbit_data.setString(oss.str());
     
@@ -286,16 +293,14 @@ int main()
     bool running = true;
     while (running)
     {
-        std::cout << "tohms(downloaded_time): " << tohms(downloaded_time) << std::endl;
-
-
-
+        //std::cout << "tohms(downloaded_time): " << tohms(downloaded_time) << std::endl;
         // light source
         GLfloat light_position[] = { 50000.f, 0.f, 50000.f, 1.f };
         GLfloat light_diffuse[] = { 1.f, 1.f, 1.f, 1.f };
         glLightfv(GL_LIGHT0, GL_POSITION, light_position);
         glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
         glEnable(GL_LIGHT0);
+
         sf::Event event;
         while (window.pollEvent(event))
         {
@@ -343,6 +348,10 @@ int main()
                 {
                     r -= event.mouseWheelScroll.delta * 1000.f;
                 }
+            }
+            if (event.type == sf::Event::KeyPressed && event.key.code == sf::Keyboard::Delete)
+            {
+                orbit_data.setString("");
             }
         }
         
@@ -404,7 +413,9 @@ int main()
         glEnd();
         xyz_axis_draw();
         window.pushGLStates();
+
         window.draw(orbit_data);
+
         window.popGLStates();
         glPopMatrix();
         window.display();

@@ -1,61 +1,58 @@
-#include <SFML/Graphics.hpp>
-#include <cmath>
-
-int main()
+while (running)
 {
-    sf::Clock clock;
-    sf::RenderWindow window(sf::VideoMode(800, 600), "Orbiter");
+    //std::cout << "tohms(downloaded_time): " << tohms(downloaded_time) << std::endl;
+    // light source
+    GLfloat light_position[] = { 50000.f, 0.f, 50000.f, 1.f };
+    GLfloat light_diffuse[] = { 1.f, 1.f, 1.f, 1.f };
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+    glEnable(GL_LIGHT0);
 
-    // Ustawienie parametrów orbity
-    sf::VertexArray orbit(sf::LineStrip, 360);
-    orbit[0].position = sf::Vector2f(300, 300);
-    orbit[0].color = sf::Color::Green;
-    float radius = 200.0f;
-    for (int i = 1; i < 360; i++) {
-        float angle = i * 3.14f / 180.0f;
-        float x = radius * std::cos(angle);
-        float y = radius * std::sin(angle);
-        orbit[i].position = sf::Vector2f(300 + x, 300 + y);
-        orbit[i].color = sf::Color::Green;
-    }
+    glViewport(window.getSize().x * 0.38, 0, window.getSize().x * 0.62, window.getSize().y);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    glMatrixMode(GL_PROJECTION);
+    glLoadIdentity();
+    gluPerspective(64.f, (float)window.getSize().x / (float)window.getSize().y * 0.62, 10.f, 200000.f);
 
-    // Ustawienie pocz¹tkowej pozycji myszy
-    sf::Vector2f lastMousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
 
-    // Aktualny k¹t orbity
-    float orbitAngle = 0.0f;
+    glBegin(GL_QUADS);
+    glColor3f(0.0f, 1.0f, 0.0f);  // kolor prostok¹ta (zielony)
+    glVertex2f(0, 0);
+    glVertex2f(window.getSize().x * 0.38, 0);
+    glVertex2f(window.getSize().x * 0.38, window.getSize().y);
+    glVertex2f(0, window.getSize().y);
+    glEnd();
 
-    // G³ówna pêtla programu
-    while (window.isOpen())
-    {
-        sf::Event event;
-        while (window.pollEvent(event))
-        {
-            if (event.type == sf::Event::Closed)
-                window.close();
-            else if (event.type == sf::Event::MouseMoved) {
-                // Obliczanie ró¿nicy pozycji myszy
-                sf::Vector2f newMousePos = window.mapPixelToCoords(sf::Mouse::getPosition(window));
-                sf::Vector2f delta = newMousePos - lastMousePos;
+    oss << "Start NIST time: " << tohms(get_ntp_time("time-a-g.nist.gov")) << std::endl
+        << "NIST time: " << tohms(downloaded_time) << std::endl
+        << "sys_time: " << sys_time() << std::endl
+        << "RP: " << rp << " km" << std::endl
+        << "RA: " << ra << " km" << std::endl
+        << "AP: " << ap << " km" << std::endl
+        << "PE: " << pe << " km" << std::endl
+        << "i (inclination): " << i_deg << " deg" << std::endl
+        << "w (perigee argument): " << w_deg << " deg" << std::endl
+        << "W (Ascending Node): " << W_deg << " deg" << std::endl
+        << "T (Period): " << T << " sec" << std::endl
+        << "a (semi-major axis): " << a * 1000 << " km" << std::endl
+        << "b (semi-minor axis): " << b * 1000 << " km" << std::endl
+        << "n (mean motion): " << n << " rad/sec" << std::endl
+        << "e (eccentricity): " << e << std::endl;
+    orbit_data.setString(oss.str());
+    window.draw(orbit_data);
 
-                // Obracanie orbity na podstawie ró¿nicy pozycji myszy
-                orbitAngle += delta.x * 0.01f;
-                lastMousePos = newMousePos;
-            }
-        }
+    window.popGLStates();
+    glPopMatrix();
+    window.display();
+}
+glDisable(GL_LIGHTING);
+glDisable(GL_LIGHT0);
+window.setActive(false);
+window.close();
 
-        // Aktualizacja pozycji planety na orbicie
-        float time = static_cast<float>(clock.getElapsedTime().asMilliseconds());
-        float angle = (time * 0.01f) + orbitAngle;
-        float x = window.getSize().x / 2.f + std::cos(angle) * radius;
-        float y = window.getSize().y / 2.f + std::sin(angle) * radius;
-        window.clear();
-        // Obracanie orbity
-        sf::Transform transform;
-        transform.rotate(orbitAngle);
-        window.draw(orbit, transform);
-        window.display();
-    }
 
-    return 0;
+t.join();
+return 0;
 }
