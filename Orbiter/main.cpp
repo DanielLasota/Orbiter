@@ -54,15 +54,17 @@
 #include <gl/GLU.h>
 #include <iostream>
 #include <sstream>
-#include <iomanip>
 #include <string>
-#include <curl/curl.h>
-#include <array>
 #include <ctime>
-#include <boost/asio.hpp>
+#include <chrono>
+#include <thread>
+//#include <iomanip>
+//#include <curl/curl.h>
+//#include <boost/asio.hpp>
+
 
 using boost::asio::ip::udp;
-
+using udp = boost::asio::ip::udp;
 const uint32_t NTP_TIMESTAMP_DELTA = 2208988800ull;
 const size_t recv_time_offset = 32;
 const size_t xmit_time_offset = 40;
@@ -102,8 +104,6 @@ void moon_draw() {
         glutSolidSphere(2000.f, 50, 50);
         glPopMatrix();
 }
-
-
 time_t get_ntp_time(const std::string& server_address)
 {
     try
@@ -111,7 +111,7 @@ time_t get_ntp_time(const std::string& server_address)
         boost::asio::io_context io_context;
 
         udp::resolver resolver(io_context);
-        udp::resolver::query query(udp::v4(), server_address, "ntp");
+        udp::resolver::query query(udp::v4(), server_address, "ntp"); //time-a-g.nist.gov
 
         udp::endpoint receiver_endpoint = *resolver.resolve(query);
 
@@ -140,9 +140,29 @@ time_t get_ntp_time(const std::string& server_address)
     }
     catch (std::exception& e)
     {
-        std::cerr << "Wystąpił błąd: " << e.what() << std::endl;
+        std::cerr << "Err whilst gettin time..." << e.what() << std::endl;
         return 0;
     }
+}
+std::string nist_time(std::string server_address)
+{
+    time_t ntp_time = get_ntp_time("time-a-g.nist.gov");
+    struct tm timeinfo;
+    localtime_s(&timeinfo, &ntp_time);
+    char buffer[80];
+    strftime(buffer, 80, "%H:%M:%S", &timeinfo);
+    //std::cout << "Czas: " << buffer << std::endl;
+    return buffer;
+}
+std::string sys_time()
+{
+    auto now = std::chrono::system_clock::now();
+    std::time_t time_now = std::chrono::system_clock::to_time_t(now);
+    std::tm timeinfo;
+    localtime_s(&timeinfo, &time_now);
+    char buffer[80];
+    std::strftime(buffer, 80, "%H:%M:%S", &timeinfo);
+    return buffer;
 }
 
 int main()
@@ -153,6 +173,11 @@ int main()
         std::cerr << "Could not load font." << std::endl;
         return 1;
     }
+    
+    std::string link = "time-a-g.nist.gov";
+    std::cout << get_ntp_time(link) << std::endl;
+    std::cout << "NIST TIME:" << nist_time(link) << std::endl;
+    std::cout << "SYS TIME : " << sys_time();
 
     sf::RenderWindow window(sf::VideoMode(800, 600), "Orbiter", sf::Style::Default, sf::ContextSettings(32));
     window.setVerticalSyncEnabled(true);
@@ -232,7 +257,9 @@ int main()
     orbit_data.setCharacterSize(12);
     orbit_data.setFillColor(sf::Color::Green);
     std::stringstream oss;
-    oss << "usno time: " << std::endl
+    oss << "NIST time: " << nist_time(link) << std::endl
+        //<< "NIST time CLOCK UPDATE: " << start_clock(link) << std::endl
+        << "sys_time: " << sys_time() << std::endl
         << "RP: " << rp << " km" << std::endl
         << "RA: " << ra << " km" << std::endl
         << "AP: " << ap << " km" << std::endl
@@ -247,7 +274,6 @@ int main()
         << "e (eccentricity): " << e << std::endl;
     orbit_data.setString(oss.str());
     
-
 
     bool running = true;
     while (running)
@@ -369,7 +395,7 @@ int main()
         window.pushGLStates();
         window.draw(orbit_data);
         window.popGLStates();
-
+        //std::cout << nist_time(link) << std::endl;
         glPopMatrix();
         window.display();
     }
@@ -631,7 +657,7 @@ int main()
 //        satellite.setPosition(orbit[index].position); 
 //
 //        window.clear();
-//        window.draw(planet);
+//        window.draw(planet);  
 //        window.draw(orbit);
 //        window.draw(satellite);
 //        window.display();
