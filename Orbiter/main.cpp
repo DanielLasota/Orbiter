@@ -281,6 +281,8 @@ int main()
         << "w (perigee argument): " << w_deg << " deg" << std::endl
         << "W (Ascending Node): " << W_deg << " deg" << std::endl
 
+
+
         << std::fixed << std::setprecision(3)
         << "T (Period): " << T << " sec" << std::endl        
         << "a (semi-major axis): " << a * 1000 << " km" << std::endl
@@ -288,7 +290,7 @@ int main()
         << "n (mean motion): " << n << " rad/sec" << std::endl
         << "e (eccentricity): " << e << std::endl;
     orbit_data.setString(oss.str());
-    
+    int i_frame = 0;
 
     bool running = true;
     while (running)
@@ -414,11 +416,42 @@ int main()
         xyz_axis_draw();
         window.pushGLStates();
 
+
+        if (i_frame % 15 == 0)
+        {
+            oss.str("");
+            oss << std::fixed << std::setprecision(3)
+                //<< "Start NIST time: " << tohms(get_ntp_time("time-a-g.nist.gov")) << std::endl
+                << "NIST time: " << tohms(downloaded_time) << std::endl
+                << "sys_time: " << sys_time() << std::endl
+                << "RP: " << rp << " km" << std::endl
+                << "RA: " << ra << " km" << std::endl
+                << "AP: " << ap << " km" << std::endl
+                << "PE: " << pe << " km" << std::endl
+
+                << std::defaultfloat
+                << "i (inclination): " << i_deg << " deg" << std::endl
+                << "w (perigee argument): " << w_deg << " deg" << std::endl
+                << "W (Ascending Node): " << W_deg << " deg" << std::endl
+
+                << std::fixed << std::setprecision(3)
+                << "T (Period): " << T << " sec" << std::endl
+                << "a (semi-major axis): " << a * 1000 << " km" << std::endl
+                << "b (semi-minor axis): " << b * 1000 << " km" << std::endl
+                << "n (mean motion): " << n << " rad/sec" << std::endl
+                << "e (eccentricity): " << e << std::endl;
+                orbit_data.setString(oss.str());
+        }
+
+        
         window.draw(orbit_data);
+        //oss << std::resetiosflags(std::ios_base::fixed | std::ios_base::floatfield);
 
         window.popGLStates();
         glPopMatrix();
         window.display();
+
+        i_frame++;
     }
     glDisable(GL_LIGHTING);
     glDisable(GL_LIGHT0);
