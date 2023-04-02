@@ -201,8 +201,6 @@ int main()
     glDepthFunc(GL_LESS);
     glEnable(GL_LIGHTING);
 
-    
-
     // Camera initalise
     sf::Vector3f cameraPosition(0.f, 0.f, 500.f);
     sf::Vector3f cameraTarget(0.f, 0.f, 0.f);
@@ -215,7 +213,6 @@ int main()
     sf::Vector2i lastPosition;
 
     float r = 40000.f; // camera's distance (radius) from the origin
-
 
     // orbit parameters define 
     float ap = 1600.658f;
