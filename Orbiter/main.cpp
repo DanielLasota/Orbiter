@@ -60,10 +60,6 @@
 #include <thread>
 #include <iomanip>
 #include <ios>
-//#include <iomanip>
-//#include <curl/curl.h>
-//#include <boost/asio.hpp>
-
 
 using boost::asio::ip::udp;
 using udp = boost::asio::ip::udp;
@@ -172,7 +168,6 @@ void clock_engine() {
     }
 }
 
-
 int main()
 {
     std::thread t(clock_engine);
@@ -183,14 +178,11 @@ int main()
         std::cerr << "Could not load font." << std::endl;
         return 1;
     }
-
-    
     std::string link = "time-a-g.nist.gov";
 
 
     get_ntp_time(link); // ntp time donwload main, first initialistion
 
-    std::cout << tohms(downloaded_time) << std::endl;
     std::cout << "NIST TIME:" << tohms(downloaded_time) << std::endl;
     std::cout << "SYS TIME : " << sys_time();
     
@@ -273,7 +265,6 @@ int main()
     orbit_data.setFillColor(sf::Color::Green);
     std::stringstream oss;
     oss << std::fixed << std::setprecision(3)
-        << "Start NIST time: " << tohms(get_ntp_time("time-a-g.nist.gov")) << std::endl
         << "NIST time: " << tohms(downloaded_time) << std::endl
         << "sys_time: " << sys_time() << std::endl
         << "RP: " << rp << " km" << std::endl
@@ -300,8 +291,6 @@ int main()
     bool running = true;
     while (running)
     {
-        //std::cout << "tohms(downloaded_time): " << tohms(downloaded_time) << std::endl;
-        // light source
         GLfloat light_position[] = { 50000.f, 0.f, 50000.f, 1.f };
         GLfloat light_diffuse[] = { 1.f, 1.f, 1.f, 1.f };
         glLightfv(GL_LIGHT0, GL_POSITION, light_position);
@@ -409,26 +398,16 @@ int main()
             //y = temp_y;
             glVertex3f(x, y, z);
         }
-        // basic circle - orbit alpha version
-        //for (int i = 0; i < 50; ++i)
-        //{
-        //    float theta = 2.0f * 3.1415926f * float(i) / float(50); // kąt w radianach
-        //    float x = 80 * cosf(theta); // współrzędna x punktu na okręgu //80 to promien orbity
-        //    float z = 80 * sinf(theta); // współrzędna z punktu na okręgu // 80 to promien orbity
-        //    glVertex3f(x, 0.f, z); // wierzchołek okręgu
-        //}
         glEnd();
         xyz_axis_draw();
         window.pushGLStates();
 
 
-        if (i_frame % 15 == 0)
+        if (i_frame % 5 == 0)
         {
             oss.str("");
             oss << std::fixed << std::setprecision(3)
-                //<< "Start NIST time: " << tohms(get_ntp_time("time-a-g.nist.gov")) << std::endl
                 << "NIST time: " << tohms(downloaded_time) << std::endl
-                //<< "sys_time: " << sys_time() << std::endl
                 << "RP: " << rp << " km" << std::endl
                 << "RA: " << ra << " km" << std::endl
                 << "AP: " << ap << " km" << std::endl
@@ -447,7 +426,6 @@ int main()
                 << "e (eccentricity): " << e << std::endl;
                 orbit_data.setString(oss.str());
         }
-
         
         window.draw(orbit_data);
         //oss << std::resetiosflags(std::ios_base::fixed | std::ios_base::floatfield);
@@ -457,6 +435,9 @@ int main()
         window.display();
 
         i_frame++;
+
+        if (i_frame >= 60)
+            i_frame = 0;
     }
     glDisable(GL_LIGHTING);
     glDisable(GL_LIGHT0);
