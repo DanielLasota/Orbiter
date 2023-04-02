@@ -48,18 +48,18 @@
 
 #include <boost/asio.hpp>
 #include <SFML/Graphics.hpp>
-#include <SFML/OpenGL.hpp>
-#include <SFML/Graphics/Text.hpp>
+//#include <SFML/OpenGL.hpp>
+//#include <SFML/Graphics/Text.hpp>
 #include <GL/glut.h>
-#include <gl/GLU.h>
+//#include <gl/GLU.h>
 #include <iostream>
-#include <sstream>
-#include <string>
-#include <ctime>
-#include <chrono>
+//#include <sstream>
+//#include <string>
 #include <thread>
 #include <iomanip>
-#include <ios>
+//#include <ctime>
+//#include <ios>
+//#include <chrono>
 
 using boost::asio::ip::udp;
 using udp = boost::asio::ip::udp;
@@ -97,7 +97,6 @@ void earth_draw() {
     glPopMatrix();
 }
 void moon_draw() {
-        ////2nd sphere just for prototypin
         glPushMatrix();
         glTranslatef(80000.f, 0.f, 0.f);
         glColor3f(1.f, 0.f, 0.f);
@@ -247,7 +246,6 @@ int main()
     if (pe > ap)
         return 0;
     float x, y, z, cosi = cos(i), sini = sin(i), cosw = cos(w), sinw = sin(w), cosW = cos(W), sinW = sin(W);
-    //float x, y, z, cosi = cos(i_deg), sini = sin(i_deg), cosw = cos(w), sinw =
 
     std::cout << "rp(perigee radius): " << rp << " m" << std::endl;
     std::cout << "ra(apogee radius): " << ra << " m" << std::endl;
@@ -390,7 +388,7 @@ int main()
         glColor3f(0.2f, 0.6f, 0.2f);
         glBegin(GL_LINE_LOOP);
         for (int i = 0; i <= 360; i++) {
-            float theta = i * 3.1415926f / 180; // kąt w radianach
+            float theta = i * 3.1415926f / 180;
             float r = (a * (1 - pow(e, 2))) / (1 + e * cos(theta));
             x = r * (cosw * cos(theta) - sinw * sin(theta) * cosi);
             y = r * (sinw * cos(theta) + cosw * sin(theta) * cosi);
@@ -431,7 +429,6 @@ int main()
                 << "e (eccentricity): " << e << std::endl;
             orbit_data.setString(oss.str());
         }
-        //orbit data render && update
 
         window.draw(orbit_data);
         oss << std::resetiosflags(std::ios_base::fixed | std::ios_base::floatfield);
