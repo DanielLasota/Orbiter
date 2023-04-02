@@ -56,3 +56,79 @@ window.close();
 t.join();
 return 0;
 }
+
+
+
+
+
+
+// satelite position and velocity
+float sat_angle = 0.f; // satelite position angle in radians
+float sat_speed = n * a * 1000; // satelite speed in m/s
+sf::Text sat_speed_text("", font, 14); // text object for displaying satelite speed
+sat_speed_text.setFillColor(sf::Color::White);
+sat_speed_text.setPosition(10.f, 100.f);
+
+bool running = true;
+while (running)
+{
+    sf::Event event;
+    while (window.pollEvent(event))
+    {
+        // Kod
+    }
+
+
+    earth_draw();
+    moon_draw();
+
+    // draw satellite as a dot
+    glPushMatrix();
+    glTranslatef(0.f, 0.f, 0.f);
+    glDisable(GL_LIGHTING);
+    glColor3f(1.f, 1.f, 1.f);
+    glPointSize(5.f);
+    glBegin(GL_POINTS);
+    float sat_r = (a * (1 - pow(e, 2))) / (1 + e * cos(sat_angle));
+    float sat_x = sat_r * (cosw * cos(sat_angle) - sinw * sin(sat_angle) * cosi);
+    float sat_y = sat_r * (sinw * cos(sat_angle) + cosw * sin(sat_angle) * cosi);
+    float sat_z = sat_r * (sini * sin(sat_angle));
+    glVertex3f(sat_x, sat_y, sat_z);
+    glEnd();
+    glPopMatrix();
+
+    // display satellite speed
+    oss.str("");
+    oss << "Satellite speed: " << sat_speed / 1000.f << " km/s";
+    sat_speed_text.setString(oss.str());
+    window.draw(sat_speed_text);
+
+    //circle render data - to transform into an orbit
+    //glDisable(GL_LIGHT0);
+    glPushMatrix();
+    glTranslatef(0.f, 0.f, 0.f);
+    glDisable(GL_LIGHTING);
+    glColor3f(0.2f, 0.6f, 0.2f);
+    glBegin(GL_LINE_LOOP);
+    for (int i = 0; i <= 360; i++) {
+        float theta = i * 3.1415926f / 180; // k¹t w radianach
+        float r = (a * (1 - pow(e, 2))) / (1 + e * cos(theta));
+        x = r * (cosw * cos(theta) - sinw * sin(theta) * cosi);
+        y = r * (sinw * cos(theta) + cosw * sin(theta) * cosi);
+        z = r * (sini * sin(theta));
+        //float temp_x = x * cosW - y Dokoñcz kod
+        glVertex3f(x, y, z);
+    }
+    glEnd();
+    glPopMatrix();
+
+    // update satellite position and angle
+    sat_angle += sat_speed * dt / (a * 1000.f);
+    if (sat_angle > 2 * M_PI)
+        sat_angle -= 2 * M_PI;
+
+    window.display();
+}
+
+return 0;
+}

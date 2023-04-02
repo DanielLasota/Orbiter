@@ -67,6 +67,7 @@ const uint32_t NTP_TIMESTAMP_DELTA = 2208988800ull;
 const size_t recv_time_offset = 32;
 const size_t xmit_time_offset = 40;
 std::atomic<time_t> downloaded_time = 0;
+//std::atomic<std::chrono::high_resolution_clock> downloaded_time = 0;
 
 void xyz_axis_draw()
 {
@@ -184,20 +185,24 @@ int main()
     get_ntp_time(link); // ntp time donwload main, first initialistion
 
     std::cout << "NIST TIME:" << tohms(downloaded_time) << std::endl;
-    std::cout << "SYS TIME : " << sys_time();
-    
-    sf::RenderWindow window(sf::VideoMode(800, 600), "Orbiter", sf::Style::Default, sf::ContextSettings(32));
-    window.setVerticalSyncEnabled(true);
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-    glEnable(GL_LIGHTING);
+    std::cout << "SYS TIME : " << sys_time() << std::endl;
 
     sf::ContextSettings settings;
     settings.depthBits = 24;
     settings.stencilBits = 8;
     settings.antialiasingLevel = 8;
-    settings.majorVersion = 3;
-    settings.minorVersion = 0;
+    settings.majorVersion = 4;
+    settings.minorVersion = 6;
+
+
+    //sf::RenderWindow window(sf::VideoMode(800, 600), "Orbiter", sf::Style::Default, sf::ContextSettings(32));
+    sf::RenderWindow window(sf::VideoMode(800, 600), "Orbiter", sf::Style::Default, settings);
+    window.setVerticalSyncEnabled(true);
+    glEnable(GL_DEPTH_TEST);
+    glDepthFunc(GL_LESS);
+    glEnable(GL_LIGHTING);
+
+    
 
     // Camera initalise
     sf::Vector3f cameraPosition(0.f, 0.f, 500.f);
@@ -210,13 +215,13 @@ int main()
     sf::Vector2f previousMousePos;
     sf::Vector2i lastPosition;
 
-    float r = 40000.f; // camera's distance from the origin
+    float r = 40000.f; // camera's distance (radius) from the origin
 
 
     // orbit parameters define 
     float ap = 1600.658f;
     float pe = 110.213f;
-    
+
     float ra = 6738.f + ap; // promień perygeum w km
     float rp = 6738.f + pe; // promień apogeum w km
     float i_deg = 60; // inklinacja w stopniach
@@ -243,8 +248,8 @@ int main()
         return 0;
     float x, y, z, cosi = cos(i), sini = sin(i), cosw = cos(w), sinw = sin(w), cosW = cos(W), sinW = sin(W);
     //float x, y, z, cosi = cos(i_deg), sini = sin(i_deg), cosw = cos(w), sinw =
-    
-    std::cout << "rp(perigee radius): " << rp  << " m" << std::endl;
+
+    std::cout << "rp(perigee radius): " << rp << " m" << std::endl;
     std::cout << "ra(apogee radius): " << ra << " m" << std::endl;
     std::cout << "AP: " << ap * 1000 << " m" << std::endl;
     std::cout << "PE: " << pe * 1000 << " m" << std::endl;
@@ -277,10 +282,8 @@ int main()
         << "w (perigee argument): " << w_deg << " deg" << std::endl
         << "W (Ascending Node): " << W_deg << " deg" << std::endl
 
-
-
         << std::fixed << std::setprecision(3)
-        << "T (Period): " << T << " sec" << std::endl        
+        << "T (Period): " << T << " sec" << std::endl
         << "a (semi-major axis): " << a * 1000 << " km" << std::endl
         << "b (semi-minor axis): " << b * 1000 << " km" << std::endl
         << "n (mean motion): " << n << " rad/sec" << std::endl
@@ -350,7 +353,7 @@ int main()
                 orbit_data.setString("");
             }
         }
-        
+
         glViewport(window.getSize().x * 0.38, 0, window.getSize().x * 0.62, window.getSize().y);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
         glMatrixMode(GL_PROJECTION);
@@ -375,7 +378,7 @@ int main()
             cameraTarget.x, cameraTarget.y, cameraTarget.z,
             cameraUp.x, cameraUp.y, cameraUp.z
         );
-       
+
         earth_draw();
         moon_draw();
 
@@ -403,7 +406,7 @@ int main()
         window.pushGLStates();
 
 
-        if (i_frame % 5 == 0)
+        if (i_frame % 2 == 0)
         {
             oss.str("");
             oss << std::fixed << std::setprecision(3)
@@ -412,11 +415,13 @@ int main()
                 << "RA: " << ra << " km" << std::endl
                 << "AP: " << ap << " km" << std::endl
                 << "PE: " << pe << " km" << std::endl
+                << std::endl
 
                 << std::defaultfloat
                 << "i (inclination): " << i_deg << " deg" << std::endl
                 << "w (perigee argument): " << w_deg << " deg" << std::endl
                 << "W (Ascending Node): " << W_deg << " deg" << std::endl
+                << std::endl
 
                 << std::fixed << std::setprecision(3)
                 << "T (Period): " << T << " sec" << std::endl
@@ -424,11 +429,12 @@ int main()
                 << "b (semi-minor axis): " << b * 1000 << " km" << std::endl
                 << "n (mean motion): " << n << " rad/sec" << std::endl
                 << "e (eccentricity): " << e << std::endl;
-                orbit_data.setString(oss.str());
+            orbit_data.setString(oss.str());
         }
-        
+        //orbit data render && update
+
         window.draw(orbit_data);
-        //oss << std::resetiosflags(std::ios_base::fixed | std::ios_base::floatfield);
+        oss << std::resetiosflags(std::ios_base::fixed | std::ios_base::floatfield);
 
         window.popGLStates();
         glPopMatrix();
@@ -448,20 +454,6 @@ int main()
     t.join();
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 //#include <SFML/Graphics.hpp>
 //#include <SFML/OpenGL.hpp>
