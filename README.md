@@ -1,16 +1,15 @@
 # Orbiter
 Simple - lightweight program to manage orbites and orbital trajectories.
 
-29.03 - Basic 3D engine ready. Orbital Render Ready. Orbital Data Panel Ready. Prototyping orbital data input and switchable orbit view - 3D - 2D ZX - cartograph
+2.04 - addin NIST synchronised clock for accurate manevuering
 
-29.03 - Addin object to be on orbit, addin parameters: Vessel (mass - dry/wet, DeltaV, Impulses, TWR etc), 
+2.04 - Basic 3D engine ready. Orbital Render Ready. Orbital Data Panel Ready. Prototyping orbital data input and switchable orbit view - 3D - 2D ZX - cartograph
 
-29.03 - Linux && android port! 
+2.04 - Addin object to be on orbit, addin parameters: Vessel (mass - dry/wet, DeltaV, Impulses, TWR etc), 
 
-30.03 - tryin to add fotochromatic aberration, nice depth of field etc
+2.04 - Linux && android port
 
-
-
+2.04 - Implementin fotochromatic aberration
 
 
 ##########################################################
@@ -37,7 +36,7 @@ To add:
 
 LOT OF WORK TO DO!!!!
 
-![alt text](https://user-images.githubusercontent.com/127039319/228481926-0a1fb048-73ab-45d8-8350-a6c2ee7b5b12.jpg)
+![alt text](https://user-images.githubusercontent.com/127039319/229324292-cd4a3fe5-84f9-4d56-a9d0-c48496d36cd8.jpg)
 
 ![alt text](https://user-images.githubusercontent.com/127039319/227675226-8856339c-bd17-401c-94c1-1688fc10a33f.jpg)
 
