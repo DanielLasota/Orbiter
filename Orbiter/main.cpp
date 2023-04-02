@@ -70,7 +70,7 @@ using udp = boost::asio::ip::udp;
 const uint32_t NTP_TIMESTAMP_DELTA = 2208988800ull;
 const size_t recv_time_offset = 32;
 const size_t xmit_time_offset = 40;
-std::atomic<time_t> downloaded_time;
+std::atomic<time_t> downloaded_time = 0;
 
 void xyz_axis_draw()
 {
@@ -183,9 +183,14 @@ int main()
         std::cerr << "Could not load font." << std::endl;
         return 1;
     }
+
     
     std::string link = "time-a-g.nist.gov";
-    std::cout << get_ntp_time(link) << std::endl;
+
+
+    get_ntp_time(link); // ntp time donwload main, first initialistion
+
+    std::cout << tohms(downloaded_time) << std::endl;
     std::cout << "NIST TIME:" << tohms(downloaded_time) << std::endl;
     std::cout << "SYS TIME : " << sys_time();
     
@@ -423,7 +428,7 @@ int main()
             oss << std::fixed << std::setprecision(3)
                 //<< "Start NIST time: " << tohms(get_ntp_time("time-a-g.nist.gov")) << std::endl
                 << "NIST time: " << tohms(downloaded_time) << std::endl
-                << "sys_time: " << sys_time() << std::endl
+                //<< "sys_time: " << sys_time() << std::endl
                 << "RP: " << rp << " km" << std::endl
                 << "RA: " << ra << " km" << std::endl
                 << "AP: " << ap << " km" << std::endl
