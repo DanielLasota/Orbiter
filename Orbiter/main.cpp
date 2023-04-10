@@ -219,7 +219,7 @@ int main()
     float earth_r = 6738;
     float earth_gm = 398600.5;
 
-    float ap = 16000.658f;
+    float ap = 1600.658f;
     float pe = 110.213f;
 
     float ra = 6738.f + ap; // promień perygeum w km
@@ -235,6 +235,17 @@ int main()
     float b = a * sqrt(1 - pow((ra - rp) / (ra + rp), 2)); //semi-minor axis
     float n = sqrt(398600.5 / pow((rp + ra) / 2, 3)); //mean motion
     float e = sqrt(1 - pow(b / a, 2)); //eccentricity
+
+    //float E0 = 0;
+    //float E1 = 1;
+    //float epsilon = 0.0001f;
+    //while (fabs(E1 - E0) > epsilon) {
+    //    E0 = E1;
+    //    E1 = M + e * sin(E0);
+    //}
+
+    //float v = 2 * atan(sqrt((1 + e) / (1 - e)) * tan(E1 / 2));
+    //float r = a * (1 - e * cos(E1));
     
     //float E0 = 0;
     //float M = 2 * 3.1415926f * fmod((glfwGetTime() / T), 1);
