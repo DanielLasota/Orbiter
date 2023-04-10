@@ -97,11 +97,11 @@ void earth_draw() {
     glPopMatrix();
 }
 void moon_draw() {
-        glPushMatrix();
-        glTranslatef(80000.f, 0.f, 0.f);
-        glColor3f(1.f, 0.f, 0.f);
-        glutSolidSphere(2000.f, 50, 50);
-        glPopMatrix();
+    glPushMatrix();
+    glTranslatef(80000.f, 0.f, 0.f);
+    glColor3f(1.f, 0.f, 0.f);
+    glutSolidSphere(2000.f, 50, 50);
+    glPopMatrix();
 }
 std::string sys_time()
 {
@@ -215,7 +215,11 @@ int main()
     float r = 40000.f; // camera's distance (radius) from the origin
 
     // orbit parameters define 
-    float ap = 1600.658f;
+    double earth_m = 5.97e24;
+    float earth_r = 6738;
+    float earth_gm = 398600.5;
+
+    float ap = 16000.658f;
     float pe = 110.213f;
 
     float ra = 6738.f + ap; // promień perygeum w km
@@ -231,6 +235,7 @@ int main()
     float b = a * sqrt(1 - pow((ra - rp) / (ra + rp), 2)); //semi-minor axis
     float n = sqrt(398600.5 / pow((rp + ra) / 2, 3)); //mean motion
     float e = sqrt(1 - pow(b / a, 2)); //eccentricity
+    
     //float E0 = 0;
     //float M = 2 * 3.1415926f * fmod((glfwGetTime() / T), 1);
     //float E = M;
@@ -240,10 +245,12 @@ int main()
     //    E = M + (ra - rp) * sin(E) / (a * b * sqrt(1 - pow(e, 2))) - E0;
     //}
 
-    if (pe > ap)
-        return 0;
+    /*if (pe > ap)
+        return 0;*/
     float x, y, z, cosi = cos(i), sini = sin(i), cosw = cos(w), sinw = sin(w), cosW = cos(W), sinW = sin(W);
 
+    std::cout << "earth mass " << earth_m << " kg" << std::endl;
+    std::cout << "stala grawitacyjna dla ziemi " << earth_gm << " km^3/s^2" << std::endl;
     std::cout << "rp(perigee radius): " << rp << " m" << std::endl;
     std::cout << "ra(apogee radius): " << ra << " m" << std::endl;
     std::cout << "AP: " << ap * 1000 << " m" << std::endl;
@@ -281,6 +288,7 @@ int main()
         << "T (Period): " << T << " sec" << std::endl
         << "a (semi-major axis): " << a * 1000 << " km" << std::endl
         << "b (semi-minor axis): " << b * 1000 << " km" << std::endl
+        << std::defaultfloat
         << "n (mean motion): " << n << " rad/sec" << std::endl
         << "e (eccentricity): " << e << std::endl;
     orbit_data.setString(oss.str());
@@ -358,7 +366,7 @@ int main()
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
 
-        //camera sphere equation
+        //camera sphere equations
         cameraPosition.x = r * cos(anglex) * cos(angley);
         cameraPosition.y = r * sin(angley);
         cameraPosition.z = r * sin(anglex) * cos(angley);
@@ -422,6 +430,7 @@ int main()
                 << "T (Period): " << T << " sec" << std::endl
                 << "a (semi-major axis): " << a * 1000 << " km" << std::endl
                 << "b (semi-minor axis): " << b * 1000 << " km" << std::endl
+                << std::fixed << std::setprecision(7)
                 << "n (mean motion): " << n << " rad/sec" << std::endl
                 << "e (eccentricity): " << e << std::endl;
             orbit_data.setString(oss.str());
