@@ -1,17 +1,15 @@
 # Orbiter
 Simple - lightweight program to manage orbites and orbital trajectories.
 
-2.04 - added NIST synchronised clock. To do: miliseconds synchro & cyclic synchronization btween SAT and on-prem soft / space center
+11.04 - NIST synchronised clock done /*almost*/. To do: miliseconds synchro & cyclic synchronization btween SAT and on-prem soft / space center
 
-2.04 - addin NIST synchronised clock for accurate manevuering
+11.04 - Basic 3D engine ready. Orbital Render Ready. Orbital Data Panel Ready. Prototyping orbital data input and switchable orbit view - 3D - 2D ZX - cartograph
 
-2.04 - Basic 3D engine ready. Orbital Render Ready. Orbital Data Panel Ready. Prototyping orbital data input and switchable orbit view - 3D - 2D ZX - cartograph
+11.04 - Addin object to be on orbit, addin parameters: Vessel (mass - dry/wet, DeltaV, Impulses, TWR etc), 
 
-2.04 - Addin object to be on orbit, addin parameters: Vessel (mass - dry/wet, DeltaV, Impulses, TWR etc), 
+11.04 - Linux && android port
 
-2.04 - Linux && android port
-
-2.04 - Implementin fotochromatic aberration
+11.04 - Implementin fotochromatic aberration
 
 
 ##########################################################
