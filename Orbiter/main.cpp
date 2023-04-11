@@ -219,8 +219,8 @@ int main()
     float earth_r = 6738;
     float earth_gm = 398600.5;
 
-    float ap = 1600.658f;
-    float pe = 110.213f;
+    float ap = 400.f;
+    float pe = 1900.f;
 
     float ra = 6738.f + ap; // promień perygeum w km
     float rp = 6738.f + pe; // promień apogeum w km
@@ -235,6 +235,16 @@ int main()
     float b = a * sqrt(1 - pow((ra - rp) / (ra + rp), 2)); //semi-minor axis
     float n = sqrt(398600.5 / pow((rp + ra) / 2, 3)); //mean motion
     float e = sqrt(1 - pow(b / a, 2)); //eccentricity
+    float T2 = 2 * 3.1415926f * sqrt(pow(a, 3) / earth_gm);
+
+    // przyjmujemy arbitralnie kąt E równy 30 stopni
+    float E_deg = 30;
+    float E = E_deg * 3.1415926f / 180;
+    float cr = (a * (1 - pow(e, 2))) / (1 + e * cos(E));
+    float cr_actual_height = cr - earth_r; //odległość od środka Ziemi
+    float vkms = sqrt(earth_gm * ((2 / cr) - (1 / a))); //aktualna prędkość orbitalna
+    float vkmh = vkms * 3600.0 / 1000.0; // przeliczenie km/s na km/h
+    float vms = vkms * 1000.0; // przeliczenie km/s na m/s
 
     //float E0 = 0;
     //float E1 = 1;
@@ -282,27 +292,6 @@ int main()
     orbit_data.setCharacterSize(12);
     orbit_data.setFillColor(sf::Color::Green);
     std::stringstream oss;
-    oss << std::fixed << std::setprecision(3)
-        << "NIST time: " << tohms(downloaded_time) << std::endl
-        << "sys_time: " << sys_time() << std::endl
-        << "RP: " << rp << " km" << std::endl
-        << "RA: " << ra << " km" << std::endl
-        << "AP: " << ap << " km" << std::endl
-        << "PE: " << pe << " km" << std::endl
-
-        << std::defaultfloat
-        << "i (inclination): " << i_deg << " deg" << std::endl
-        << "w (perigee argument): " << w_deg << " deg" << std::endl
-        << "W (Ascending Node): " << W_deg << " deg" << std::endl
-
-        << std::fixed << std::setprecision(3)
-        << "T (Period): " << T << " sec" << std::endl
-        << "a (semi-major axis): " << a * 1000 << " km" << std::endl
-        << "b (semi-minor axis): " << b * 1000 << " km" << std::endl
-        << std::defaultfloat
-        << "n (mean motion): " << n << " rad/sec" << std::endl
-        << "e (eccentricity): " << e << std::endl;
-    orbit_data.setString(oss.str());
     int i_frame = 0;
 
     bool running = true;
@@ -439,11 +428,17 @@ int main()
 
                 << std::fixed << std::setprecision(3)
                 << "T (Period): " << T << " sec" << std::endl
+                << "T2 (Period 2): " << T2 << " sec" << std::endl
                 << "a (semi-major axis): " << a * 1000 << " km" << std::endl
                 << "b (semi-minor axis): " << b * 1000 << " km" << std::endl
                 << std::fixed << std::setprecision(7)
                 << "n (mean motion): " << n << " rad/sec" << std::endl
-                << "e (eccentricity): " << e << std::endl;
+                << "e (eccentricity): " << e << std::endl
+                << std::endl
+
+                << "actual height: " << cr_actual_height << " km" << std::endl
+                << "v (m/s): " << vms << " m/s" << std::endl
+                << "v (km/h): " << vkmh << " km/h" << std::endl;
             orbit_data.setString(oss.str());
         }
 
