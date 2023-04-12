@@ -178,9 +178,9 @@ int main()
         std::cerr << "Could not load font." << std::endl;
         return 1;
     }
+
+
     std::string link = "time-a-g.nist.gov";
-
-
     get_ntp_time(link); // ntp time donwload main, first initialistion
 
     std::cout << "NIST TIME:" << tohms(downloaded_time) << std::endl;
@@ -237,15 +237,16 @@ int main()
     float e = sqrt(1 - pow(b / a, 2)); //eccentricity
     float T2 = 2 * 3.1415926f * sqrt(pow(a, 3) / earth_gm);
 
-    // przyjmujemy arbitralnie kąt E równy 30 stopni
+    // przyjmujemy kąt E równy 30 stopni
     float E_deg = 30;
     float E = E_deg * 3.1415926f / 180;
     float cr = (a * (1 - pow(e, 2))) / (1 + e * cos(E));
     float cr_actual_height = cr - earth_r; //odległość od środka Ziemi
     float vkms = sqrt(earth_gm * ((2 / cr) - (1 / a))); //aktualna prędkość orbitalna
-    float vkmh = vkms * 3600.0 / 1000.0; // przeliczenie km/s na km/h
-    float vms = vkms * 1000.0; // przeliczenie km/s na m/s
+    float vkmh = vkms * 3600.0 / 1000.0; // km/s to km/h
+    float vms = vkms * 1000.0; // km/s to m/s
 
+    float x, y, z, cosi = cos(i), sini = sin(i), cosw = cos(w), sinw = sin(w), cosW = cos(W), sinW = sin(W);
     //float E0 = 0;
     //float E1 = 1;
     //float epsilon = 0.0001f;
@@ -268,7 +269,7 @@ int main()
 
     /*if (pe > ap)
         return 0;*/
-    float x, y, z, cosi = cos(i), sini = sin(i), cosw = cos(w), sinw = sin(w), cosW = cos(W), sinW = sin(W);
+    
 
     std::cout << "earth mass " << earth_m << " kg" << std::endl;
     std::cout << "stala grawitacyjna dla ziemi " << earth_gm << " km^3/s^2" << std::endl;
