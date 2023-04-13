@@ -57,6 +57,7 @@
 //#include <string>
 #include <thread>
 #include <iomanip>
+#include <conio.h>
 //#include <ctime>
 //#include <ios>
 //#include <chrono>
@@ -88,8 +89,7 @@ void xyz_axis_draw()
     glVertex3f(0.f, 0.f, 10000.f);
     glEnd();
     glEnable(GL_LIGHTING);
-}
-void earth_draw() {
+}void earth_draw() {
     glPushMatrix();
     glTranslatef(0.f, 0.f, 0.f);
     glColor3f(1.f, 0.f, 0.f);
@@ -101,6 +101,13 @@ void moon_draw() {
     glTranslatef(80000.f, 0.f, 0.f);
     glColor3f(1.f, 0.f, 0.f);
     glutSolidSphere(2000.f, 50, 50);
+    glPopMatrix();
+}
+void sat_draw() {
+    glPushMatrix();
+    glTranslatef(0.f, 0.f, 0.f);
+    glColor3f(1.f, 0.f, 0.f);
+    glutSolidSphere(100.f, 50, 50);
     glPopMatrix();
 }
 std::string sys_time()
@@ -185,6 +192,7 @@ int main()
 
     std::cout << "NIST TIME:" << tohms(downloaded_time) << std::endl;
     std::cout << "SYS TIME : " << sys_time() << std::endl;
+    time_t t_zero = downloaded_time;
 
     sf::ContextSettings settings;
     settings.depthBits = 24;
@@ -227,21 +235,22 @@ int main()
     float i_deg = 60; // inklinacja w stopniach
     float w_deg = 0; // argument perygeum w stopniach
     float W_deg = 60; // węzeł wstępujący w stopniach
-    float T = 90 * 60; // czas okresu obiegu w sekundach
+    float a = (rp + ra) / 2; //semi-major axis
+    float b = a * sqrt(1 - pow((ra - rp) / (ra + rp), 2)); //semi-minor axis
+    float T = 2 * 3.1415926f * sqrt(pow(a, 3) / earth_gm); // ookres orbitalny
     float i = i_deg * 3.1415926f / 180;
     float w = w_deg * 3.1415926f / 180;
     float W = W_deg * 3.1415926f / 180;
-    float a = (rp + ra) / 2; //semi-major axis
-    float b = a * sqrt(1 - pow((ra - rp) / (ra + rp), 2)); //semi-minor axis
     float n = sqrt(398600.5 / pow((rp + ra) / 2, 3)); //mean motion
     float e = sqrt(1 - pow(b / a, 2)); //eccentricity
-    float T2 = 2 * 3.1415926f * sqrt(pow(a, 3) / earth_gm);
+    
+
 
     // przyjmujemy kąt E równy 30 stopni
-    float E_deg = 30;
+    float E_deg = 0;
     float E = E_deg * 3.1415926f / 180;
-    float cr = (a * (1 - pow(e, 2))) / (1 + e * cos(E));
-    float cr_actual_height = cr - earth_r; //odległość od środka Ziemi
+    float cr = (a * (1 - pow(e, 2))) / (1 + e * cos(E)); //odległość od środka Ziemi
+    float cr_actual_height = cr - earth_r; //aktualna wysokosc
     float vkms = sqrt(earth_gm * ((2 / cr) - (1 / a))); //aktualna prędkość orbitalna
     float vkmh = vkms * 3600.0 / 1000.0; // km/s to km/h
     float vms = vkms * 1000.0; // km/s to m/s
@@ -294,6 +303,13 @@ int main()
     orbit_data.setFillColor(sf::Color::Green);
     std::stringstream oss;
     int i_frame = 0;
+
+    float xs, ys, zs;
+    float diff;
+
+
+    int chx;
+    int ch;
 
     bool running = true;
     while (running)
@@ -386,6 +402,38 @@ int main()
         earth_draw();
         moon_draw();
 
+
+
+        chx = _getch();
+        ch = (int)((char)chx - '0'); //int ch to zwykly int
+
+        if (!_getch())
+            continue;
+
+
+
+        diff = downloaded_time - t_zero;
+        E_deg -= diff / T;
+
+        //satelite position render data
+        float theta = E_deg * 3.1415926f / 180;
+        float r = (a * (1 - pow(e, 2))) / (1 + e * cos(theta));
+        xs = r * (cosw * cos(theta) - sinw * sin(theta) * cosi);
+        ys = r * (sinw * cos(theta) + cosw * sin(theta) * cosi);
+        zs = r * (sini * sin(theta));
+        //float temp_x = x * cosW - y * sinW;
+        //float temp_y = x * sinW + y * cosW;
+        //x = temp_x;
+        //y = temp_y;
+        glPushMatrix();
+        glTranslatef(xs, ys, zs);
+        glDisable(GL_LIGHTING);
+        glColor3f(0.f, 1.f, 0.f);
+        glutSolidSphere(50.f, 50, 50);
+        glPopMatrix();
+        //end of satelite position render data
+
+
         //circle render data - to transform into an orbit
         //glDisable(GL_LIGHT0);
         glPushMatrix();
@@ -405,6 +453,7 @@ int main()
             //y = temp_y;
             glVertex3f(x, y, z);
         }
+
         glEnd();
         xyz_axis_draw();
         window.pushGLStates();
@@ -414,6 +463,9 @@ int main()
         {
             oss.str("");
             oss << std::fixed << std::setprecision(3)
+                << "downloaded_time: " << downloaded_time << " " << std::endl
+                << "t_zero: " << t_zero << std::endl
+                << "diff: " << diff << std::endl
                 << "NIST time: " << tohms(downloaded_time) << std::endl
                 << "RP: " << rp << " km" << std::endl
                 << "RA: " << ra << " km" << std::endl
@@ -429,7 +481,6 @@ int main()
 
                 << std::fixed << std::setprecision(3)
                 << "T (Period): " << T << " sec" << std::endl
-                << "T2 (Period 2): " << T2 << " sec" << std::endl
                 << "a (semi-major axis): " << a * 1000 << " km" << std::endl
                 << "b (semi-minor axis): " << b * 1000 << " km" << std::endl
                 << std::fixed << std::setprecision(7)
