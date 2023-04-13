@@ -307,13 +307,25 @@ int main()
     float xs, ys, zs;
     float diff;
 
-
-    int chx;
-    int ch;
+    float chx;
+    float ch;
+    int view_button = 0;
 
     bool running = true;
     while (running)
     {
+
+        if (_kbhit()) {
+            int chx = _getch();
+            int ch = (int)((char)chx - '0');
+            if (chx == 'v')
+                view_button += 1;
+        }
+        if (view_button >= 2)
+            view_button = 0;
+
+
+
         GLfloat light_position[] = { 50000.f, 0.f, 50000.f, 1.f };
         GLfloat light_diffuse[] = { 1.f, 1.f, 1.f, 1.f };
         glLightfv(GL_LIGHT0, GL_POSITION, light_position);
@@ -383,37 +395,63 @@ int main()
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
 
-        //camera sphere equations
-        cameraPosition.x = r * cos(anglex) * cos(angley);
-        cameraPosition.y = r * sin(angley);
-        cameraPosition.z = r * sin(anglex) * cos(angley);
-        cameraTarget.x = 0;
-        cameraTarget.y = 0;
-        cameraTarget.z = 0;
-        cameraUp.x = 0;
-        cameraUp.y = 1;
-        cameraUp.z = 0;
-        gluLookAt(
-            cameraPosition.x, cameraPosition.y, cameraPosition.z,
-            cameraTarget.x, cameraTarget.y, cameraTarget.z,
-            cameraUp.x, cameraUp.y, cameraUp.z
-        );
+        if (view_button == 0)
+        {        
+            //camera sphere equations
+            cameraPosition.x = r * cos(anglex) * cos(angley);
+            cameraPosition.y = r * sin(angley);
+            cameraPosition.z = r * sin(anglex) * cos(angley);
+            cameraTarget.x = 0;
+            cameraTarget.y = 0;
+            cameraTarget.z = 0;
+            cameraUp.x = 0;
+            cameraUp.y = 1;
+            cameraUp.z = 0;
+            gluLookAt(
+                cameraPosition.x, cameraPosition.y, cameraPosition.z,
+                cameraTarget.x, cameraTarget.y, cameraTarget.z,
+                cameraUp.x, cameraUp.y, cameraUp.z
+            );
+
+        }
+        else if (view_button = 1) //ustawienie kamery z focusem na satelite - to do 
+        {
+            //camera sphere equations
+            cameraPosition.x = r * cos(anglex) * cos(angley);
+            cameraPosition.y = r * sin(angley);
+            cameraPosition.z = r * sin(anglex) * cos(angley);
+            cameraTarget.x = 0;
+            cameraTarget.y = 0;
+            cameraTarget.z = 0;
+            cameraUp.x = 0;
+            cameraUp.y = 1;
+            cameraUp.z = 0;
+            gluLookAt(
+                cameraPosition.x, cameraPosition.y, cameraPosition.z,
+                cameraTarget.x, cameraTarget.y, cameraTarget.z,
+                cameraUp.x, cameraUp.y, cameraUp.z
+            );
+        }
+
 
         earth_draw();
         moon_draw();
 
 
 
-        chx = _getch();
-        ch = (int)((char)chx - '0'); //int ch to zwykly int
 
-        if (!_getch())
-            continue;
-
-
-
+        // VARIABLES FOR CHANGIN SATELITE POSITION
         diff = downloaded_time - t_zero;
-        E_deg -= diff / T;
+        E_deg -= (diff / T) * 360;
+
+        E = E_deg * 3.1415926f / 180;
+        cr = (a * (1 - pow(e, 2))) / (1 + e * cos(E)); //odległość od środka Ziemi
+        cr_actual_height = cr - earth_r; //aktualna wysokosc
+        vkms = sqrt(earth_gm * ((2 / cr) - (1 / a))); //aktualna prędkość orbitalna
+        vkmh = vkms * 3600.0 / 1000.0; // km/s to km/h
+        vms = vkms * 1000.0; // km/s to m/s
+
+
 
         //satelite position render data
         float theta = E_deg * 3.1415926f / 180;
@@ -490,7 +528,8 @@ int main()
 
                 << "actual height: " << cr_actual_height << " km" << std::endl
                 << "v (m/s): " << vms << " m/s" << std::endl
-                << "v (km/h): " << vkmh << " km/h" << std::endl;
+                << "v (km/h): " << vkmh << " km/h" << std::endl
+                << "v button:  " << view_button << std::endl;
             orbit_data.setString(oss.str());
         }
 
