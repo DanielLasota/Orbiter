@@ -74,20 +74,20 @@ void xyz_axis_draw()
 {
     glPushMatrix();
     glDisable(GL_LIGHTING);
-    glBegin(GL_LINES);
-    // X axis
-    glColor3f(1.f, 0.f, 0.f);
-    glVertex3f(0.f, 0.f, 0.f);
-    glVertex3f(10000.f, 0.f, 0.f);
-    // Y axis
-    glColor3f(0.f, 1.f, 0.f);
-    glVertex3f(0.f, 0.f, 0.f);
-    glVertex3f(0.f, 10000.f, 0.f);
-    // Z asix
-    glColor3f(0.f, 0.f, 1.f);
-    glVertex3f(0.f, 0.f, 0.f);
-    glVertex3f(0.f, 0.f, 10000.f);
-    glEnd();
+    //glBegin(GL_LINES);
+    //// X axis
+    //glColor3f(1.f, 0.f, 0.f);
+    //glVertex3f(0.f, 0.f, 0.f);
+    //glVertex3f(10000.f, 0.f, 0.f);
+    //// Y axis
+    //glColor3f(0.f, 1.f, 0.f);
+    //glVertex3f(0.f, 0.f, 0.f);
+    //glVertex3f(0.f, 10000.f, 0.f);
+    //// Z asix
+    //glColor3f(0.f, 0.f, 1.f);
+    //glVertex3f(0.f, 0.f, 0.f);
+    //glVertex3f(0.f, 0.f, 10000.f);
+    //glEnd();
     glEnable(GL_LIGHTING);
 }void earth_draw() {
     glPushMatrix();
@@ -256,6 +256,19 @@ int main()
     float vms = vkms * 1000.0; // km/s to m/s
 
     float x, y, z, cosi = cos(i), sini = sin(i), cosw = cos(w), sinw = sin(w), cosW = cos(W), sinW = sin(W);
+
+    int total_seconds = (int)T;
+    int minutes = total_seconds / 60;
+    int seconds = total_seconds % 60;
+    int milliseconds = (T - total_seconds) * 1000;
+
+    std::stringstream T_format;
+    T_format << std::setw(2) << std::setfill('0') << minutes << ":";
+    T_format << std::setw(2) << std::setfill('0') << seconds << ":";
+    T_format << std::setw(3) << std::setfill('0') << milliseconds;
+
+    std::string formatted_time = T_format.str();
+
     //float E0 = 0;
     //float E1 = 1;
     //float epsilon = 0.0001f;
@@ -442,12 +455,13 @@ int main()
 
         // VARIABLES FOR CHANGIN SATELITE POSITION
         diff = downloaded_time - t_zero;
-        E_deg -= (diff / T) * 360;
+        E_deg = (-diff / T) * 360;
 
         E = E_deg * 3.1415926f / 180;
         cr = (a * (1 - pow(e, 2))) / (1 + e * cos(E)); //odległość od środka Ziemi
         cr_actual_height = cr - earth_r; //aktualna wysokosc
         vkms = sqrt(earth_gm * ((2 / cr) - (1 / a))); //aktualna prędkość orbitalna
+
         vkmh = vkms * 3600.0 / 1000.0; // km/s to km/h
         vms = vkms * 1000.0; // km/s to m/s
 
@@ -515,10 +529,10 @@ int main()
                 << "i (inclination): " << i_deg << " deg" << std::endl
                 << "w (perigee argument): " << w_deg << " deg" << std::endl
                 << "W (Ascending Node): " << W_deg << " deg" << std::endl
-                << std::endl
 
                 << std::fixed << std::setprecision(3)
                 << "T (Period): " << T << " sec" << std::endl
+                << "T (Period): " << formatted_time << "     min:sec:ms" << std::endl
                 << "a (semi-major axis): " << a * 1000 << " km" << std::endl
                 << "b (semi-minor axis): " << b * 1000 << " km" << std::endl
                 << std::fixed << std::setprecision(7)
@@ -526,10 +540,13 @@ int main()
                 << "e (eccentricity): " << e << std::endl
                 << std::endl
 
+                << std::fixed << std::setprecision(3)
                 << "actual height: " << cr_actual_height << " km" << std::endl
                 << "v (m/s): " << vms << " m/s" << std::endl
                 << "v (km/h): " << vkmh << " km/h" << std::endl
-                << "v button:  " << view_button << std::endl;
+                //<< "v button:  " << view_button << std::endl
+                << "Period status - since periapsis(%):" << std::endl << diff << "/" << T << std::endl << (diff / T) * 100 << "%" << std::endl
+                << "E_deg: " << E_deg << std::endl;
             orbit_data.setString(oss.str());
         }
 
@@ -544,6 +561,8 @@ int main()
 
         if (i_frame >= 60)
             i_frame = 0;
+        if (diff >= T)
+            diff = 0;
     }
     glDisable(GL_LIGHTING);
     glDisable(GL_LIGHT0);
