@@ -74,20 +74,20 @@ void xyz_axis_draw()
 {
     glPushMatrix();
     glDisable(GL_LIGHTING);
-    //glBegin(GL_LINES);
-    //// X axis
-    //glColor3f(1.f, 0.f, 0.f);
-    //glVertex3f(0.f, 0.f, 0.f);
-    //glVertex3f(10000.f, 0.f, 0.f);
-    //// Y axis
-    //glColor3f(0.f, 1.f, 0.f);
-    //glVertex3f(0.f, 0.f, 0.f);
-    //glVertex3f(0.f, 10000.f, 0.f);
-    //// Z asix
-    //glColor3f(0.f, 0.f, 1.f);
-    //glVertex3f(0.f, 0.f, 0.f);
-    //glVertex3f(0.f, 0.f, 10000.f);
-    //glEnd();
+    glBegin(GL_LINES);
+    // X axis
+    glColor3f(1.f, 0.f, 0.f);
+    glVertex3f(0.f, 0.f, 0.f);
+    glVertex3f(10000.f, 0.f, 0.f);
+    // Y axis
+    glColor3f(0.f, 1.f, 0.f);
+    glVertex3f(0.f, 0.f, 0.f);
+    glVertex3f(0.f, 10000.f, 0.f);
+    // Z asix
+    glColor3f(0.f, 0.f, 1.f);
+    glVertex3f(0.f, 0.f, 0.f);
+    glVertex3f(0.f, 0.f, 10000.f);
+    glEnd();
     glEnable(GL_LIGHTING);
 }void earth_draw() {
     glPushMatrix();
@@ -232,7 +232,8 @@ int main()
 
     float ra = 6738.f + ap; // promień perygeum w km
     float rp = 6738.f + pe; // promień apogeum w km
-    float i_deg = 60; // inklinacja w stopniach
+    float i_deg = 0; // inklinacja w stopniach
+    i_deg -= 90;
     float w_deg = 0; // argument perygeum w stopniach
     float W_deg = 60; // węzeł wstępujący w stopniach
     float a = (rp + ra) / 2; //semi-major axis
@@ -455,7 +456,7 @@ int main()
 
         // VARIABLES FOR CHANGIN SATELITE POSITION
         diff = downloaded_time - t_zero;
-        E_deg = (-diff / T) * 360;
+        E_deg = (diff / T) * 360;
 
         E = E_deg * 3.1415926f / 180;
         cr = (a * (1 - pow(e, 2))) / (1 + e * cos(E)); //odległość od środka Ziemi
