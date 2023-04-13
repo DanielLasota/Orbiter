@@ -18,8 +18,6 @@ To add:
 
 -multiple objects & constellations 
 
--Satellite parameters: orbital speed, apoapsis, periapsis, orbital period, time do apoapsis/periapsis, inclination, eccentricity, nodes
-
 -manevuer assist: edit orbit by pro/retro gradin, nml, rad - KSP Style
 
 -add 2 views - side & top - a'la Space Shuttle navigation system
@@ -28,11 +26,11 @@ To add:
 
 -Implement current position with rotating - GRAD, NML, RAD
 
--implement simple algorithm for reentry
-
 -add navball / horizont (switchable)
 
 -add simulated input from 3(at least) sensors & voting while outbound/malfunction
+
+-implement simple algorithm for reentry
 
 LOT OF WORK TO DO!!!!
 
