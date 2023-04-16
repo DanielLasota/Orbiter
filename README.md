@@ -35,7 +35,7 @@ To add:
 LOT OF WORK TO DO!!!!
 
 
-![alt text](https://user-images.githubusercontent.com/127039319/231624488-50bd62b1-3795-42b3-a479-9acdd531d571.jpg)
+![alt text](https://user-images.githubusercontent.com/127039319/232323983-52e444a6-b047-4457-8c15-dd5f389e2303.jpg)
 
 ![alt text](https://user-images.githubusercontent.com/127039319/231624520-0561ec1c-f5b2-4732-894b-0239b0e4209d.jpg)
 
