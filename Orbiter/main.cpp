@@ -73,6 +73,7 @@ std::atomic<time_t> downloaded_time = 0;
 void xyz_axis_draw()
 {
     glPushMatrix();
+
     glDisable(GL_LIGHTING);
     glBegin(GL_LINES);
     // X axis
@@ -89,7 +90,8 @@ void xyz_axis_draw()
     glVertex3f(0.f, 0.f, 10000.f);
     glEnd();
     glEnable(GL_LIGHTING);
-}void earth_draw() {
+}
+void earth_draw() {
     glPushMatrix();
     glTranslatef(0.f, 0.f, 0.f);
     glColor3f(1.f, 0.f, 0.f);
@@ -174,6 +176,22 @@ void clock_engine() {
         std::this_thread::sleep_for(std::chrono::seconds(1));
     }
 }
+std::string sto_hms(float n)
+{
+    int total_seconds = (int)n;
+    int minutes = total_seconds / 60;
+    int seconds = total_seconds % 60;
+    int milliseconds = (n - total_seconds) * 1000;
+
+    std::stringstream T_format;
+    T_format << std::setw(2) << std::setfill('0') << minutes << ":";
+    T_format << std::setw(2) << std::setfill('0') << seconds << ":";
+    T_format << std::setw(3) << std::setfill('0') << milliseconds;
+
+    std::string formatted_time = T_format.str();
+
+    return formatted_time;
+}
 
 int main()
 {
@@ -223,36 +241,37 @@ int main()
     float r = 40000.f; // camera's distance (radius) from the origin
 
     // orbit parameters define 
-    double earth_m = 5.97e24;
-    float earth_r = 6738;
-    float earth_gm = 398600.5;
+    double earth_mass = 5.97e24;
+    float earth_radius = 6738;
+    float earth_g_const = 398600.5;
 
     float ap = 400.f;
     float pe = 1900.f;
 
     float ra = 6738.f + ap; // promień perygeum w km
     float rp = 6738.f + pe; // promień apogeum w km
-    float i_deg = 0; // inklinacja w stopniach
+    float i_deg = 40; // inklinacja w stopniach
     i_deg -= 90;
     float w_deg = 0; // argument perygeum w stopniach
     float W_deg = 60; // węzeł wstępujący w stopniach
     float a = (rp + ra) / 2; //semi-major axis
     float b = a * sqrt(1 - pow((ra - rp) / (ra + rp), 2)); //semi-minor axis
-    float T = 2 * 3.1415926f * sqrt(pow(a, 3) / earth_gm); // ookres orbitalny
+    float T = 2 * 3.1415926f * sqrt(pow(a, 3) / earth_g_const); // ookres orbitalny
     float i = i_deg * 3.1415926f / 180;
     float w = w_deg * 3.1415926f / 180;
     float W = W_deg * 3.1415926f / 180;
     float n = sqrt(398600.5 / pow((rp + ra) / 2, 3)); //mean motion
     float e = sqrt(1 - pow(b / a, 2)); //eccentricity
     
-
+    float time_to_pe;
+    float time_to_ap;
 
     // przyjmujemy kąt E równy 30 stopni
-    float E_deg = 0;
+    float E_deg = 0; //true anomaly (from perigee to object on orbit plane),  degrees
     float E = E_deg * 3.1415926f / 180;
     float cr = (a * (1 - pow(e, 2))) / (1 + e * cos(E)); //odległość od środka Ziemi
-    float cr_actual_height = cr - earth_r; //aktualna wysokosc
-    float vkms = sqrt(earth_gm * ((2 / cr) - (1 / a))); //aktualna prędkość orbitalna
+    float cr_actual_height = cr - earth_radius; //aktualna wysokosc
+    float vkms = sqrt(earth_g_const * ((2 / cr) - (1 / a))); //aktualna prędkość orbitalna
     float vkmh = vkms * 3600.0 / 1000.0; // km/s to km/h
     float vms = vkms * 1000.0; // km/s to m/s
 
@@ -294,8 +313,8 @@ int main()
         return 0;*/
     
 
-    std::cout << "earth mass " << earth_m << " kg" << std::endl;
-    std::cout << "stala grawitacyjna dla ziemi " << earth_gm << " km^3/s^2" << std::endl;
+    std::cout << "earth mass " << earth_mass << " kg" << std::endl;
+    std::cout << "stala grawitacyjna dla ziemi " << earth_g_const << " km^3/s^2" << std::endl;
     std::cout << "rp(perigee radius): " << rp << " m" << std::endl;
     std::cout << "ra(apogee radius): " << ra << " m" << std::endl;
     std::cout << "AP: " << ap * 1000 << " m" << std::endl;
@@ -460,11 +479,28 @@ int main()
 
         E = E_deg * 3.1415926f / 180;
         cr = (a * (1 - pow(e, 2))) / (1 + e * cos(E)); //odległość od środka Ziemi
-        cr_actual_height = cr - earth_r; //aktualna wysokosc
-        vkms = sqrt(earth_gm * ((2 / cr) - (1 / a))); //aktualna prędkość orbitalna
+        cr_actual_height = cr - earth_radius; //aktualna wysokosc
+        vkms = sqrt(earth_g_const * ((2 / cr) - (1 / a))); //aktualna prędkość orbitalna
 
         vkmh = vkms * 3600.0 / 1000.0; // km/s to km/h
         vms = vkms * 1000.0; // km/s to m/s
+
+
+        time_to_pe = ((360 - E_deg) / 360) * T;
+        time_to_ap = ((360 - E_deg - 180) / 360) * T;
+
+
+        //int total_seconds = (int)T;
+        //int minutes = total_seconds / 60;
+        //int seconds = total_seconds % 60;
+        //int milliseconds = (T - total_seconds) * 1000;
+
+        //std::stringstream T_format;
+        //T_format << std::setw(2) << std::setfill('0') << minutes << ":";
+        //T_format << std::setw(2) << std::setfill('0') << seconds << ":";
+        //T_format << std::setw(3) << std::setfill('0') << milliseconds;
+
+        //std::string formatted_time = T_format.str();
 
 
 
@@ -520,6 +556,7 @@ int main()
                 << "t_zero: " << t_zero << std::endl
                 << "diff: " << diff << std::endl
                 << "NIST time: " << tohms(downloaded_time) << std::endl
+                << "systemn time: " << sys_time() << std::endl
                 << "RP: " << rp << " km" << std::endl
                 << "RA: " << ra << " km" << std::endl
                 << "AP: " << ap << " km" << std::endl
@@ -547,7 +584,15 @@ int main()
                 << "v (km/h): " << vkmh << " km/h" << std::endl
                 //<< "v button:  " << view_button << std::endl
                 << "Period status - since periapsis(%):" << std::endl << diff << "/" << T << std::endl << (diff / T) * 100 << "%" << std::endl
-                << "E_deg: " << E_deg << std::endl;
+                << "E_deg: " << E_deg << std::endl
+                << std::endl
+                << "time to periapsis: " << sto_hms(time_to_pe) << std::endl
+                << "time to apoapsis: " << sto_hms(time_to_ap) << std::endl;
+
+
+
+
+
             orbit_data.setString(oss.str());
         }
 
