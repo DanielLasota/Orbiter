@@ -271,7 +271,7 @@ int main()
     float E = E_deg * 3.1415926f / 180;
     float cr = (a * (1 - pow(e, 2))) / (1 + e * cos(E)); //odległość od środka Ziemi
     float cr_actual_height = cr - earth_radius; //aktualna wysokosc
-    float vkms = sqrt(earth_g_const * ((2 / cr) - (1 / a))); //aktualna prędkość orbitalna
+    float vkms = sqrt(earth_g_const * ((2 / cr) - (1 / a))); //actual orbital speed
     float vkmh = vkms * 3600.0 / 1000.0; // km/s to km/h
     float vms = vkms * 1000.0; // km/s to m/s
 
