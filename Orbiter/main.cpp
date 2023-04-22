@@ -619,7 +619,6 @@ int main()
     t.join();
     return 0;
 }
-
 //#include <SFML/Graphics.hpp>
 //#include <SFML/OpenGL.hpp>
 //#include <GL/glut.h>
